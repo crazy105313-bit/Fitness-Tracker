@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark" style="color-scheme: dark;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- ဖုန်း Browser များ အရောင်ပြောင်းပြန်မလှန်စေရန် ထည့်ရမည့် Meta Tags -->
+    <meta name="color-scheme" content="dark only">
+    <meta name="supported-color-schemes" content="dark">
     <title>FITFORGE — 7-Day Workout & Diet Tracker</title>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter -->
@@ -27,8 +31,10 @@
     </script>
 
     <style>
-        :root {
-            color-scheme: dark;
+        :root, html, body, * {
+            color-scheme: only dark !important;
+            forced-color-adjust: none !important;
+            -webkit-forced-color-adjust: none !important;
         }
 
         html, body {
