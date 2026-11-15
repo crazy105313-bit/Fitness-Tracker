@@ -1,0 +1,1994 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FITFORGE — 7-Day Workout & Diet Tracker</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html, body {
+            overflow-x: hidden;
+            max-width: 100vw;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #090d16;
+            color: #f1f5f9;
+        }
+
+        /* Custom subtle scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Glass card effect */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.78);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.65);
+        }
+
+        .glass-modal {
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(71, 85, 105, 0.85);
+        }
+
+        /* Pulse animation for floating button */
+        @keyframes subtlePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
+            50% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+        }
+        .pulse-btn {
+            animation: subtlePulse 2.5s infinite;
+        }
+
+        .tab-transition {
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-emerald-500 selection:text-slate-950">
+
+    <!-- Background Ambient Glows -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/3 -right-32 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-32 left-1/3 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- TOP NAVIGATION BAR (3 Main Pages) -->
+    <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md">
+        <div class="max-w-6xl mx-auto px-3.5 sm:px-6 py-2.5 sm:py-3">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2.5 sm:gap-3">
+                
+                <!-- Brand Logo & Name -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-slate-950 shadow-lg shadow-emerald-500/20">
+                            <i class="fa-solid fa-dumbbell text-lg sm:text-xl"></i>
+                        </div>
+                        <h1 class="text-lg sm:text-xl font-extrabold tracking-wider text-white">
+                            FITFORGE
+                        </h1>
+                    </div>
+                </div>
+
+                <!-- 3 Main Pages Navigation Tabs -->
+                <nav class="grid grid-cols-3 gap-1.5 sm:gap-2 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
+                    <button type="button" id="nav-workout" onclick="window.switchPage('workout')" class="tab-transition flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm bg-emerald-500 text-slate-950 shadow-md">
+                        <i class="fa-solid fa-dumbbell"></i>
+                        <span>Workouts</span>
+                    </button>
+                    <button type="button" id="nav-diet" onclick="window.switchPage('diet')" class="tab-transition flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800/60">
+                        <i class="fa-solid fa-utensils"></i>
+                        <span>Diet Plan</span>
+                    </button>
+                    <button type="button" id="nav-history" onclick="window.switchPage('history')" class="tab-transition flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 relative">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span>7-Day History</span>
+                        <span id="nav-history-badge" class="hidden ml-1 px-1.5 py-0.5 text-[10px] font-extrabold rounded-full bg-amber-400 text-slate-950">0</span>
+                    </button>
+                </nav>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="relative z-10 flex-1 max-w-6xl w-full mx-auto px-3.5 sm:px-6 py-5 sm:py-8 pb-24 sm:pb-14">
+
+        <!-- ========================================================== -->
+        <!-- PAGE 1: WORKOUT PAGE                                       -->
+        <!-- ========================================================== -->
+        <section id="page-workout" class="space-y-5 sm:space-y-6">
+            
+            <!-- Top Control Bar: Day Dropdown -->
+            <div class="glass-card rounded-3xl p-4 sm:p-6 shadow-xl">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    
+                    <!-- Page Heading -->
+                    <div class="space-y-1">
+                        <div class="inline-flex items-center gap-2 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
+                            <i class="fa-solid fa-fire-flame-curved"></i> Daily Workout Plan
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">Daily Workouts by Category</h2>
+                    </div>
+
+                    <!-- Day Dropdown Selector -->
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <!-- 7-Day Dropdown -->
+                        <div class="relative flex-1 sm:flex-initial sm:min-w-[210px]">
+                            <label for="workout-day-select" class="block text-[11px] font-medium text-slate-400 mb-1">
+                                <i class="fa-regular fa-calendar-days mr-1 text-emerald-400"></i> Select Day (Day 1 – 7)
+                            </label>
+                            <div class="relative">
+                                <select id="workout-day-select" onchange="window.changeWorkoutDay(this.value)" class="w-full appearance-none bg-slate-900 border border-slate-700 hover:border-emerald-500/60 focus:border-emerald-400 text-white font-bold text-sm rounded-2xl pl-4 pr-10 py-3 outline-none transition cursor-pointer shadow-inner">
+                                    <option value="Day 1">Day 1</option>
+                                    <option value="Day 2">Day 2</option>
+                                    <option value="Day 3">Day 3</option>
+                                    <option value="Day 4">Day 4</option>
+                                    <option value="Day 5">Day 5</option>
+                                    <option value="Day 6">Day 6</option>
+                                    <option value="Day 7">Day 7</option>
+                                </select>
+                                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick 7-Day Pill Strip (Synced with Dropdown) -->
+                <div class="mt-4 sm:mt-5 pt-4 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto pb-1" id="workout-day-pills">
+                    <!-- Rendered dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Day Summary Banner -->
+            <div id="workout-day-summary" class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <!-- Rendered dynamically via JS -->
+            </div>
+
+            <!-- Grouped Workout Categories Container -->
+            <div id="workout-categories-container" class="space-y-5">
+                <!-- Category cards (e.g., Chest, Back, Legs) rendered dynamically here -->
+            </div>
+
+        </section>
+
+
+        <!-- ========================================================== -->
+        <!-- PAGE 2: DIET & MEAL PLAN PAGE                              -->
+        <!-- ========================================================== -->
+        <section id="page-diet" class="hidden space-y-5 sm:space-y-6">
+            
+            <!-- Top Control Bar: Day Dropdown + New Text Box Button -->
+            <div class="glass-card rounded-3xl p-4 sm:p-6 shadow-xl">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    
+                    <!-- Page Heading -->
+                    <div class="space-y-1">
+                        <div class="inline-flex items-center gap-2 text-amber-400 text-xs font-semibold uppercase tracking-wider">
+                            <i class="fa-solid fa-bowl-food"></i> Daily Nutrition & Meals
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">Daily Diet & Meal Plan</h2>
+                    </div>
+
+                    <!-- Day Dropdown Selector & New Text Box Button -->
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <!-- 7-Day Dropdown -->
+                        <div class="relative flex-1 sm:flex-initial sm:min-w-[190px]">
+                            <label for="diet-day-select" class="block text-[11px] font-medium text-slate-400 mb-1">
+                                <i class="fa-regular fa-calendar-days mr-1 text-amber-400"></i> Select Day (Day 1 – 7)
+                            </label>
+                            <div class="relative">
+                                <select id="diet-day-select" onchange="window.changeDietDay(this.value)" class="w-full appearance-none bg-slate-900 border border-slate-700 hover:border-amber-500/60 focus:border-amber-400 text-white font-bold text-sm rounded-2xl pl-4 pr-10 py-3 outline-none transition cursor-pointer shadow-inner">
+                                    <option value="Day 1">Day 1</option>
+                                    <option value="Day 2">Day 2</option>
+                                    <option value="Day 3">Day 3</option>
+                                    <option value="Day 4">Day 4</option>
+                                    <option value="Day 5">Day 5</option>
+                                    <option value="Day 6">Day 6</option>
+                                    <option value="Day 7">Day 7</option>
+                                </select>
+                                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                            </div>
+                        </div>
+
+                        <!-- Summon New Meal Text Box Button -->
+                        <div class="pt-0 sm:pt-5 w-full sm:w-auto">
+                            <button type="button" onclick="window.addMealTextBox()" class="w-full sm:w-auto flex items-center justify-center gap-2.5 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-extrabold px-5 py-3 rounded-2xl shadow-lg shadow-amber-500/25 active:scale-95 transition">
+                                <span class="w-6 h-6 rounded-lg bg-slate-950/20 flex items-center justify-center text-base">
+                                    <i class="fa-solid fa-plus"></i>
+                                </span>
+                                <span>+ New Text Box</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick 7-Day Pill Strip for Diet (Synced with Dropdown) -->
+                <div class="mt-4 sm:mt-5 pt-4 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto pb-1" id="diet-day-pills">
+                    <!-- Rendered dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Quick Meal Presets Helper Bar -->
+            <div class="flex flex-wrap items-center justify-between gap-3 px-1">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs text-slate-400"><i class="fa-solid fa-bolt text-amber-400 mr-1"></i>Quick Add:</span>
+                    <button type="button" onclick="window.addMealTextBox('First Meal (Breakfast)')" class="text-xs px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 transition">
+                        + First Meal (Breakfast)
+                    </button>
+                    <button type="button" onclick="window.addMealTextBox('Second Meal (Lunch)')" class="text-xs px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 transition">
+                        + Second Meal (Lunch)
+                    </button>
+                    <button type="button" onclick="window.addMealTextBox('Third Meal (Snack)')" class="text-xs px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 transition">
+                        + Third Meal (Snack)
+                    </button>
+                    <button type="button" onclick="window.addMealTextBox('Fourth Meal (Dinner)')" class="text-xs px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 transition">
+                        + Fourth Meal (Dinner)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Meal Text Boxes Grid Container -->
+            <div id="diet-boxes-container" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- Dynamic Meal Text Box cards rendered here -->
+            </div>
+
+        </section>
+
+
+        <!-- ========================================================== -->
+        <!-- PAGE 3: WEEKLY HISTORY & LOG PAGE                          -->
+        <!-- ========================================================== -->
+        <section id="page-history" class="hidden space-y-5 sm:space-y-6">
+            
+            <!-- Header & Filter Controls + Google Sheets Live Sync Controls -->
+            <div class="glass-card rounded-3xl p-4 sm:p-6 shadow-xl">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="inline-flex items-center gap-2 text-cyan-400 text-xs font-semibold uppercase tracking-wider">
+                            <i class="fa-solid fa-chart-line"></i> Daily & 1-Week Record Log
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">7-Day Workout & Nutrition History</h2>
+                    </div>
+
+                    <!-- Filter by Day + Google Sheets Sync & Setup + Restart All 7 Days -->
+                    <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-end gap-2.5">
+                        <div class="relative flex-1 sm:flex-initial sm:min-w-[200px]">
+                            <label for="history-day-filter" class="block text-[11px] font-medium text-slate-400 mb-1">
+                                <i class="fa-solid fa-filter mr-1 text-cyan-400"></i> Filter by Day
+                            </label>
+                            <div class="relative">
+                                <select id="history-day-filter" onchange="window.renderHistoryPage()" class="w-full appearance-none bg-slate-900 border border-slate-700 hover:border-cyan-500/60 focus:border-cyan-400 text-white font-bold text-sm rounded-2xl pl-4 pr-10 py-3 outline-none transition cursor-pointer">
+                                    <option value="ALL">All 7 Days (Full Week)</option>
+                                    <option value="Day 1">Day 1</option>
+                                    <option value="Day 2">Day 2</option>
+                                    <option value="Day 3">Day 3</option>
+                                    <option value="Day 4">Day 4</option>
+                                    <option value="Day 5">Day 5</option>
+                                    <option value="Day 6">Day 6</option>
+                                    <option value="Day 7">Day 7</option>
+                                </select>
+                                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                            </div>
+                        </div>
+
+                        <!-- Google Sheets Setup Button -->
+                        <button type="button" onclick="window.openSheetsModal()" class="min-h-[46px] px-4 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 hover:border-emerald-500/50 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95">
+                            <span id="sheet-status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+                            <i class="fa-solid fa-file-excel text-emerald-400"></i>
+                            <span>Sheets Setup</span>
+                        </button>
+
+                        <!-- Sync All 7 Days to Google Sheets Button -->
+                        <button type="button" onclick="window.syncAllDaysToSheet()" class="min-h-[46px] px-4 py-3 rounded-2xl bg-emerald-500/20 hover:bg-emerald-500 hover:text-slate-950 text-emerald-300 border border-emerald-500/40 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Sync 7 Days to Sheet</span>
+                        </button>
+
+                        <!-- Restart All 7 Days Button -->
+                        <button type="button" onclick="window.openRestartModal('ALL')" class="min-h-[46px] px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-xs sm:text-sm shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 active:scale-95 transition">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            <span>Restart All 7 Days</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1-Week Overview Stats Cards (ONLY 2 STAT CARDS: Finished Exercises & Meals Logged) -->
+            <div id="history-weekly-stats" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <!-- Dynamically populated -->
+            </div>
+
+            <!-- 7-Day Timeline Log Cards -->
+            <div id="history-days-container" class="space-y-4 sm:space-y-6">
+                <!-- Dynamically populated per day -->
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- FLOATING '+' BUTTON FOR WORKOUT PAGE -->
+    <button type="button" id="floating-add-btn" onclick="window.openWorkoutModal()" title="Add New Workout" class="fixed bottom-5 right-5 z-30 w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 text-slate-950 shadow-2xl flex items-center justify-center text-2xl font-bold hover:scale-105 active:scale-95 transition pulse-btn">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+
+    <!-- ========================================================== -->
+    <!-- MODAL: ADD / EDIT WORKOUT EXERCISE                         -->
+    <!-- ========================================================== -->
+    <div id="workout-modal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div class="glass-modal w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl border-t sm:border border-slate-700/80 max-h-[92vh] overflow-y-auto">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-3.5 border-b border-slate-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <i class="fa-solid fa-dumbbell"></i>
+                    </div>
+                    <h3 id="workout-modal-title" class="text-base sm:text-lg font-extrabold text-white">Add New Workout Exercise</h3>
+                </div>
+                <button type="button" onclick="window.closeWorkoutModal()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Form -->
+            <form id="workout-form" onsubmit="window.handleWorkoutSubmit(event)" class="space-y-4 pt-4">
+                <input type="hidden" id="edit-exercise-id" value="">
+
+                <!-- Day Selection -->
+                <div>
+                    <label for="modal-day" class="block text-xs font-bold text-slate-300 mb-1.5">
+                        Select Day (Day 1 – Day 7)
+                    </label>
+                    <div class="relative">
+                        <select id="modal-day" required class="w-full appearance-none bg-slate-900 border border-slate-700 focus:border-emerald-400 text-white font-semibold text-sm rounded-2xl px-4 py-3 outline-none transition">
+                            <option value="Day 1">Day 1</option>
+                            <option value="Day 2">Day 2</option>
+                            <option value="Day 3">Day 3</option>
+                            <option value="Day 4">Day 4</option>
+                            <option value="Day 5">Day 5</option>
+                            <option value="Day 6">Day 6</option>
+                            <option value="Day 7">Day 7</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                    </div>
+                </div>
+
+                <!-- Workout Category Title (e.g., Chest) -->
+                <div>
+                    <label for="modal-category" class="block text-xs font-bold text-slate-300 mb-1.5">
+                        Workout Title / Muscle Group (e.g., Chest, Back, Legs)
+                    </label>
+                    <input
+                        type="text"
+                        id="modal-category"
+                        required
+                        placeholder="e.g., Chest"
+                        class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-400 text-white font-semibold text-sm rounded-2xl px-4 py-3 outline-none transition placeholder:text-slate-500"
+                    >
+                    <!-- Quick Category Chips -->
+                    <div class="flex flex-wrap items-center gap-1.5 mt-2">
+                        <span class="text-[11px] text-slate-400 mr-1">Quick Pick:</span>
+                        <button type="button" onclick="window.fillCategoryChip('Chest')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-300 border border-slate-700 transition">Chest</button>
+                        <button type="button" onclick="window.fillCategoryChip('Back')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-300 border border-slate-700 transition">Back</button>
+                        <button type="button" onclick="window.fillCategoryChip('Legs')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-300 border border-slate-700 transition">Legs</button>
+                        <button type="button" onclick="window.fillCategoryChip('Shoulders')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-300 border border-slate-700 transition">Shoulders</button>
+                        <button type="button" onclick="window.fillCategoryChip('Arms')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-300 border border-slate-700 transition">Arms</button>
+                        <button type="button" onclick="window.fillCategoryChip('Abs / Core')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-300 border border-slate-700 transition">Abs / Core</button>
+                    </div>
+                </div>
+
+                <!-- Exercise Name -->
+                <div>
+                    <label for="modal-name" class="block text-xs font-bold text-slate-300 mb-1.5">
+                        Exercise Name
+                    </label>
+                    <input
+                        type="text"
+                        id="modal-name"
+                        required
+                        placeholder="e.g., Barbell Bench Press"
+                        class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-400 text-white font-semibold text-sm rounded-2xl px-4 py-3 outline-none transition placeholder:text-slate-500"
+                    >
+                </div>
+
+                <!-- Steps (Sets), Reps, Weight (kg) -->
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label for="modal-steps" class="block text-xs font-bold text-slate-300 mb-1.5">
+                            Steps (Sets)
+                        </label>
+                        <input
+                            type="number"
+                            id="modal-steps"
+                            min="1"
+                            required
+                            placeholder="4"
+                            class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-400 text-white font-semibold text-sm rounded-2xl px-3.5 py-3 outline-none transition placeholder:text-slate-500"
+                        >
+                    </div>
+                    <div>
+                        <label for="modal-reps" class="block text-xs font-bold text-slate-300 mb-1.5">
+                            Reps
+                        </label>
+                        <input
+                            type="text"
+                            id="modal-reps"
+                            required
+                            placeholder="10-12"
+                            class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-400 text-white font-semibold text-sm rounded-2xl px-3.5 py-3 outline-none transition placeholder:text-slate-500"
+                        >
+                    </div>
+                    <div>
+                        <label for="modal-weight" class="block text-xs font-bold text-slate-300 mb-1.5">
+                            Weight (kg)
+                        </label>
+                        <input
+                            type="number"
+                            id="modal-weight"
+                            step="any"
+                            min="0"
+                            required
+                            placeholder="50"
+                            class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-400 text-white font-semibold text-sm rounded-2xl px-3.5 py-3 outline-none transition placeholder:text-slate-500"
+                        >
+                    </div>
+                </div>
+
+                <!-- Submit & Cancel Buttons -->
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
+                    <button type="button" onclick="window.closeWorkoutModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs sm:text-sm transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 flex items-center gap-2 transition">
+                        <i class="fa-solid fa-check"></i>
+                        <span id="workout-modal-submit-text">Add Exercise</span>
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MODAL: CONFIRM RESTART DAY OR ALL 7 DAYS                   -->
+    <!-- ========================================================== -->
+    <div id="restart-confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div class="glass-modal w-full max-w-md rounded-3xl p-6 shadow-2xl border border-amber-500/40 text-center space-y-4">
+            <div class="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-2xl">
+                <i class="fa-solid fa-rotate-left"></i>
+            </div>
+            <h3 id="restart-modal-title" class="text-lg font-bold text-white">Restart Day?</h3>
+            <p id="restart-modal-desc" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                All your added exercises will stay saved, their status will reset to <strong>Finish (Unfinished)</strong>, and written Diet Plan entries will be cleared.
+            </p>
+            <div class="flex items-center justify-center gap-3 pt-2">
+                <button type="button" onclick="window.closeRestartModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition">
+                    Cancel
+                </button>
+                <button type="button" id="restart-modal-confirm-btn" onclick="window.confirmRestartAction()" class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-sm font-extrabold transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span>Restart Now</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MODAL: GOOGLE SHEETS LIVE SYNC SETUP                       -->
+    <!-- ========================================================== -->
+    <div id="sheets-setup-modal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div class="glass-modal w-full max-w-xl rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl border-t sm:border border-slate-700/80 max-h-[92vh] overflow-y-auto space-y-4">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <i class="fa-solid fa-file-excel"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base sm:text-lg font-extrabold text-white">Google Sheets Live Sync</h3>
+                        <p class="text-[11px] text-slate-400">Connect your Google Sheet to record workouts & diet logs</p>
+                    </div>
+                </div>
+                <button type="button" onclick="window.closeSheetsModal()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Web App URL Input -->
+            <div class="space-y-2">
+                <label for="google-sheet-url-input" class="block text-xs font-bold text-slate-300">
+                    Google Apps Script Web App URL
+                </label>
+                <input
+                    type="url"
+                    id="google-sheet-url-input"
+                    placeholder="https://script.google.com/macros/s/.../exec"
+                    class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-400 text-white text-xs sm:text-sm rounded-2xl px-4 py-3 outline-none transition placeholder:text-slate-500"
+                >
+                <label class="flex items-center gap-2.5 pt-1 cursor-pointer select-none">
+                    <input type="checkbox" id="google-sheet-autosync-checkbox" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer">
+                    <span class="text-xs text-slate-300">Auto-sync immediately to Google Sheets when clicking <strong>Finish</strong> on an exercise</span>
+                </label>
+            </div>
+
+            <!-- Copy Apps Script Code Section -->
+            <div class="rounded-2xl bg-slate-900/90 border border-slate-800 p-4 space-y-2.5">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-code"></i> Google Sheets Apps Script Code
+                    </span>
+                    <button type="button" onclick="window.copyAppsScriptCode()" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500 hover:text-slate-950 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>Copy Script Code</span>
+                    </button>
+                </div>
+                <ol class="text-[11px] text-slate-400 space-y-1 list-decimal list-inside leading-relaxed">
+                    <li>Open your Google Sheet ➔ <strong>Extensions</strong> ➔ <strong>Apps Script</strong>.</li>
+                    <li>Paste the copied script code and click <strong>Save</strong>.</li>
+                    <li>Click <strong>Deploy</strong> ➔ <strong>New deployment</strong> ➔ Select type: <strong>Web app</strong>.</li>
+                    <li>Set <em>Who has access</em> to <strong>Anyone</strong>, click <strong>Deploy</strong>, and paste the Web App URL above.</li>
+                </ol>
+            </div>
+
+            <!-- Save & Test Footer -->
+            <div class="flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-slate-800">
+                <button type="button" onclick="window.testGoogleSheetConnection()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs sm:text-sm transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-plug-circle-check"></i>
+                    <span>Test Connection</span>
+                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="window.closeSheetsModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs sm:text-sm transition">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="window.saveGoogleSheetSettings()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-check"></i>
+                        <span>Save Settings</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center gap-2"></div>
+
+    <!-- ========================================================== -->
+    <!-- APPLICATION JAVASCRIPT                                     -->
+    <!-- ========================================================== -->
+    <script>
+        // --- CONSTANTS & STATE ---
+        const STORAGE_KEY = 'fitforge_en_tracker_v4';
+        const SHEET_URL_STORAGE_KEY = 'fitforge_google_sheet_url';
+        const SHEET_AUTOSYNC_STORAGE_KEY = 'fitforge_google_sheet_autosync';
+
+        // အကယ်၍ Web App URL ကို Code ထဲတွင် အသေထည့်ထားချင်ပါက အောက်ပါ "" ထဲတွင် ထည့်နိုင်ပါသည်
+        const DEFAULT_GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw_8H0VC3H7JeALVgrJzWjhML-zSmz-6Uyd6EcukK7HxDS_b8FuYjEg-260dDyuFfhIDg/exec";
+
+        const DAYS_LIST = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
+        const ORDINAL_MEAL_NAMES = [
+            'First Meal',
+            'Second Meal',
+            'Third Meal',
+            'Fourth Meal',
+            'Fifth Meal',
+            'Sixth Meal'
+        ];
+
+        let currentPage = 'workout'; // 'workout' | 'diet' | 'history'
+        let currentWorkoutDay = 'Day 1';
+        let currentDietDay = 'Day 1';
+        let pendingRestartTarget = null; // 'ALL' or 'Day 1'..'Day 7'
+        let appData = {
+            workouts: [], // { id, day, category, name, steps, reps, weight, finished, finishedAt }
+            meals: []     // { id, day, title, content, savedAt }
+        };
+
+        // --- 24-HOUR TIME FORMATTER (e.g., "09:46") ---
+        function get24HourTime() {
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            return `${hh}:${mm}`;
+        }
+
+        // --- INITIAL SAMPLE DATA ---
+        function getDefaultSampleData() {
+            return {
+                workouts: [
+                    {
+                        id: 'w_sample_1',
+                        day: 'Day 1',
+                        category: 'Chest',
+                        name: 'Barbell Bench Press',
+                        steps: 4,
+                        reps: '10-12',
+                        weight: 50,
+                        finished: true,
+                        finishedAt: '09:30'
+                    },
+                    {
+                        id: 'w_sample_2',
+                        day: 'Day 1',
+                        category: 'Chest',
+                        name: 'Incline Dumbbell Press',
+                        steps: 4,
+                        reps: '12',
+                        weight: 20,
+                        finished: true,
+                        finishedAt: '09:40'
+                    },
+                    {
+                        id: 'w_sample_3',
+                        day: 'Day 1',
+                        category: 'Chest',
+                        name: 'Cable Chest Fly',
+                        steps: 3,
+                        reps: '15',
+                        weight: 15,
+                        finished: false,
+                        finishedAt: null
+                    },
+                    {
+                        id: 'w_sample_4',
+                        day: 'Day 1',
+                        category: 'Arms',
+                        name: 'Tricep Rope Pushdown',
+                        steps: 4,
+                        reps: '12-15',
+                        weight: 22.5,
+                        finished: false,
+                        finishedAt: null
+                    },
+                    {
+                        id: 'w_sample_5',
+                        day: 'Day 2',
+                        category: 'Back',
+                        name: 'Lat Pulldown',
+                        steps: 4,
+                        reps: '12',
+                        weight: 45,
+                        finished: false,
+                        finishedAt: null
+                    },
+                    {
+                        id: 'w_sample_6',
+                        day: 'Day 2',
+                        category: 'Back',
+                        name: 'Seated Cable Row',
+                        steps: 4,
+                        reps: '10-12',
+                        weight: 40,
+                        finished: false,
+                        finishedAt: null
+                    },
+                    {
+                        id: 'w_sample_7',
+                        day: 'Day 3',
+                        category: 'Legs',
+                        name: 'Barbell Squat',
+                        steps: 4,
+                        reps: '10',
+                        weight: 70,
+                        finished: false,
+                        finishedAt: null
+                    }
+                ],
+                meals: [
+                    {
+                        id: 'm_sample_1',
+                        day: 'Day 1',
+                        title: 'First Meal (Breakfast)',
+                        content: '3 Boiled Eggs, 1 bowl of Rolled Oats with banana slices, and 1 cup of Black Coffee.',
+                        savedAt: '08:15'
+                    },
+                    {
+                        id: 'm_sample_2',
+                        day: 'Day 1',
+                        title: 'Second Meal (Lunch)',
+                        content: '200g Grilled Chicken Breast, 1 cup of Brown Rice, Steamed Broccoli and Mixed Vegetables.',
+                        savedAt: '12:45'
+                    }
+                ]
+            };
+        }
+
+        // --- STORAGE FUNCTIONS ---
+        function loadData() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && Array.isArray(parsed.workouts) && Array.isArray(parsed.meals)) {
+                        appData = parsed;
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading from localStorage:', err);
+            }
+            appData = getDefaultSampleData();
+            saveData();
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+                updateHistoryBadge();
+            } catch (err) {
+                console.error('Error saving to localStorage:', err);
+            }
+        }
+
+        // --- HELPER UTILITIES ---
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function normalizeCategoryKey(title) {
+            return String(title || '').trim().toLowerCase();
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            const colors = type === 'success'
+                ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+                : type === 'amber'
+                ? 'bg-amber-400 text-slate-950 border-amber-300'
+                : 'bg-slate-800 text-white border-slate-600';
+
+            toast.className = `px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm shadow-2xl border flex items-center gap-2 transition-all duration-300 transform translate-y-2 opacity-0 ${colors}`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-bell'}"></i> <span>${escapeHtml(message)}</span>`;
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        // --- NAVIGATION BETWEEN THE 3 MAIN PAGES ---
+        function switchPage(page) {
+            currentPage = page;
+
+            document.getElementById('page-workout').classList.add('hidden');
+            document.getElementById('page-diet').classList.add('hidden');
+            document.getElementById('page-history').classList.add('hidden');
+
+            const navIds = {
+                workout: { btn: 'nav-workout', activeClass: 'bg-emerald-500 text-slate-950 shadow-md' },
+                diet: { btn: 'nav-diet', activeClass: 'bg-amber-400 text-slate-950 shadow-md' },
+                history: { btn: 'nav-history', activeClass: 'bg-cyan-400 text-slate-950 shadow-md' }
+            };
+
+            Object.keys(navIds).forEach(key => {
+                const btnEl = document.getElementById(navIds[key].btn);
+                btnEl.className = 'tab-transition flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 relative';
+            });
+
+            document.getElementById(`page-${page}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(navIds[page].btn);
+            activeBtn.className = `tab-transition flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm relative ${navIds[page].activeClass}`;
+
+            const floatBtn = document.getElementById('floating-add-btn');
+            if (page === 'workout') {
+                floatBtn.classList.remove('hidden');
+                renderWorkoutPage();
+            } else if (page === 'diet') {
+                floatBtn.classList.add('hidden');
+                renderDietPage();
+            } else if (page === 'history') {
+                floatBtn.classList.add('hidden');
+                renderHistoryPage();
+            }
+        }
+
+        // ==========================================================
+        // PAGE 1: WORKOUTS LOGIC & RENDERING
+        // ==========================================================
+        function changeWorkoutDay(day) {
+            currentWorkoutDay = day;
+            document.getElementById('workout-day-select').value = day;
+            renderWorkoutPage();
+        }
+
+        function renderWorkoutDayPills() {
+            const container = document.getElementById('workout-day-pills');
+            container.innerHTML = DAYS_LIST.map(day => {
+                const dayWorkouts = appData.workouts.filter(w => w.day === day);
+                const count = dayWorkouts.length;
+                const allDone = count > 0 && dayWorkouts.every(w => w.finished);
+                const isSelected = day === currentWorkoutDay;
+
+                return `
+                    <button type="button" onclick="window.changeWorkoutDay('${day}')" class="flex-shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold border transition flex items-center gap-2 ${
+                        isSelected
+                            ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-sm'
+                            : 'bg-slate-900/70 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                    }">
+                        <span>${day}</span>
+                        ${count > 0 ? `
+                            <span class="px-1.5 py-0.5 text-[10px] rounded-full ${
+                                allDone ? 'bg-emerald-500 text-slate-950 font-extrabold' : 'bg-slate-800 text-slate-300'
+                            }">
+                                ${allDone ? '<i class="fa-solid fa-check"></i>' : count}
+                            </span>
+                        ` : ''}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function getGroupedWorkoutsForDay(day) {
+            const dayItems = appData.workouts.filter(w => w.day === day);
+            const groupsMap = new Map();
+
+            dayItems.forEach(item => {
+                const key = normalizeCategoryKey(item.category);
+                if (!groupsMap.has(key)) {
+                    groupsMap.set(key, {
+                        key: key,
+                        displayTitle: item.category.trim(),
+                        exercises: []
+                    });
+                }
+                groupsMap.get(key).exercises.push(item);
+            });
+
+            return Array.from(groupsMap.values());
+        }
+
+        function renderWorkoutPage() {
+            document.getElementById('workout-day-select').value = currentWorkoutDay;
+            renderWorkoutDayPills();
+
+            const groups = getGroupedWorkoutsForDay(currentWorkoutDay);
+            const dayExercises = appData.workouts.filter(w => w.day === currentWorkoutDay);
+            const finishedExercises = dayExercises.filter(w => w.finished).length;
+            const finishedGroups = groups.filter(g => g.exercises.length > 0 && g.exercises.every(e => e.finished)).length;
+            const totalSteps = dayExercises.reduce((sum, e) => sum + (Number(e.steps) || 0), 0);
+
+            const summaryEl = document.getElementById('workout-day-summary');
+            summaryEl.innerHTML = `
+                <div class="glass-card rounded-2xl p-4 border border-slate-800/90 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-calendar-day"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-slate-400">Selected Day</p>
+                        <p class="text-sm sm:text-base font-extrabold text-white">${currentWorkoutDay}</p>
+                    </div>
+                </div>
+                <div class="glass-card rounded-2xl p-4 border border-slate-800/90 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-slate-400">Workout Categories</p>
+                        <p class="text-sm sm:text-base font-extrabold text-white">${groups.length} Groups <span class="text-xs font-normal text-emerald-400">(${finishedGroups} Done)</span></p>
+                    </div>
+                </div>
+                <div class="glass-card rounded-2xl p-4 border border-slate-800/90 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-dumbbell"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-slate-400">Total Exercises</p>
+                        <p class="text-sm sm:text-base font-extrabold text-white">${dayExercises.length} Exercises <span class="text-xs font-normal text-slate-400">(${totalSteps} Steps)</span></p>
+                    </div>
+                </div>
+                <div class="glass-card rounded-2xl p-4 border border-slate-800/90 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-slate-400">Completion Status</p>
+                        <p class="text-sm sm:text-base font-extrabold text-white">${finishedExercises} / ${dayExercises.length} <span class="text-xs font-normal text-amber-300">Finished</span></p>
+                    </div>
+                </div>
+            `;
+
+            const container = document.getElementById('workout-categories-container');
+
+            if (groups.length === 0) {
+                container.innerHTML = `
+                    <div class="glass-card rounded-3xl p-8 sm:p-12 text-center border border-dashed border-slate-700/80 space-y-4">
+                        <div class="w-16 h-16 rounded-3xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto text-2xl">
+                            <i class="fa-solid fa-dumbbell"></i>
+                        </div>
+                        <div class="space-y-1 max-w-md mx-auto">
+                            <h3 class="text-lg font-bold text-white">No Workouts Added for ${currentWorkoutDay} Yet</h3>
+                            <p class="text-xs sm:text-sm text-slate-400">
+                                Click the <span class="text-emerald-400 font-bold">+ Add Workout</span> button to add your Workout Title (e.g., Chest), Exercise Name, Steps, Reps, and Weight (kg).
+                            </p>
+                        </div>
+                        <button type="button" onclick="window.openWorkoutModal()" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/20 transition">
+                            <i class="fa-solid fa-plus"></i> Add Workout for ${currentWorkoutDay}
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = groups.map(group => {
+                const isGroupFinished = group.exercises.length > 0 && group.exercises.every(ex => ex.finished);
+                const completedCount = group.exercises.filter(ex => ex.finished).length;
+                const encodedCategory = encodeURIComponent(group.displayTitle);
+
+                return `
+                    <div class="glass-card rounded-3xl overflow-hidden transition-all border ${
+                        isGroupFinished
+                            ? 'border-emerald-500/60 shadow-lg shadow-emerald-500/10'
+                            : 'border-slate-800'
+                    }">
+                        <!-- Category Title Header (e.g., CHEST) -->
+                        <div class="px-4 sm:px-6 py-4 bg-slate-900/90 border-b border-slate-800/90 flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-base sm:text-lg font-extrabold ${
+                                    isGroupFinished
+                                        ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/25'
+                                        : 'bg-slate-800 text-emerald-400 border border-slate-700'
+                                }">
+                                    <i class="fa-solid ${isGroupFinished ? 'fa-check-double' : 'fa-fire'}"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h3 class="text-lg sm:text-xl font-extrabold text-white tracking-tight">${escapeHtml(group.displayTitle)}</h3>
+                                        <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold ${
+                                            isGroupFinished
+                                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                                : 'bg-slate-800 text-slate-300 border border-slate-700'
+                                        }">
+                                            ${completedCount} / ${group.exercises.length} Completed
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-slate-400">${currentWorkoutDay} • ${escapeHtml(group.displayTitle)} Exercises</p>
+                                </div>
+                            </div>
+
+                            <!-- Quick + Add Exercise Button Inside Category Card -->
+                            <button type="button" onclick="window.openWorkoutModalForCategory(decodeURIComponent('${encodedCategory}'))" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-emerald-500/20 hover:text-emerald-300 text-slate-200 border border-slate-700 hover:border-emerald-500/40 text-xs font-bold transition">
+                                <i class="fa-solid fa-plus text-emerald-400"></i>
+                                <span>+ Add Exercise</span>
+                            </button>
+                        </div>
+
+                        <!-- Exercises List inside this Category Card -->
+                        <div class="p-4 sm:p-6 divide-y divide-slate-800/70">
+                            ${group.exercises.map((ex, idx) => `
+                                <div class="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition ${ex.finished ? 'bg-emerald-500/[0.03] -mx-2 px-2 rounded-2xl' : ''}">
+                                    
+                                    <!-- Left: Index & Exercise Details -->
+                                    <div class="flex items-start sm:items-center gap-3.5">
+                                        <div class="mt-0.5 sm:mt-0 w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center border transition ${
+                                            ex.finished
+                                                ? 'bg-emerald-500 border-emerald-400 text-slate-950 font-bold shadow-sm shadow-emerald-500/30'
+                                                : 'bg-slate-900 border-slate-700 text-slate-400'
+                                        }">
+                                            ${ex.finished ? '<i class="fa-solid fa-check text-sm"></i>' : `<span class="text-xs font-bold">${idx + 1}</span>`}
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <h4 class="font-bold text-sm sm:text-base ${ex.finished ? 'line-through text-slate-400' : 'text-white'}">
+                                                    ${escapeHtml(ex.name)}
+                                                </h4>
+                                                ${ex.finished ? `
+                                                    <span class="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                                        <i class="fa-solid fa-circle-check"></i> Done
+                                                    </span>
+                                                ` : ''}
+                                            </div>
+                                            <div class="flex flex-wrap items-center gap-2 mt-1.5">
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-xs font-semibold text-emerald-300">
+                                                    <i class="fa-solid fa-repeat text-[10px]"></i> Steps (Sets): <strong>${escapeHtml(ex.steps)}</strong>
+                                                </span>
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-xs font-semibold text-cyan-300">
+                                                    <i class="fa-solid fa-bolt text-[10px]"></i> Reps: <strong>${escapeHtml(ex.reps)}</strong>
+                                                </span>
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-xs font-semibold text-amber-300">
+                                                    <i class="fa-solid fa-weight-hanging text-[10px]"></i> Weight: <strong>${escapeHtml(ex.weight)} kg</strong>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right: Individual Finish / Finished (Undo) Button + Edit & Delete Controls -->
+                                    <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800/60">
+                                        <button type="button" onclick="window.toggleSingleExerciseFinish('${ex.id}')" class="flex-1 sm:flex-initial px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition ${
+                                            ex.finished
+                                                ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/50'
+                                                : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-md shadow-emerald-500/20 active:scale-95'
+                                        }">
+                                            <i class="fa-solid ${ex.finished ? 'fa-rotate-left' : 'fa-check'}"></i>
+                                            <span>${ex.finished ? 'Finished (Undo)' : 'Finish'}</span>
+                                        </button>
+
+                                        <div class="flex items-center gap-1.5">
+                                            <button type="button" onclick="window.openEditWorkoutModal('${ex.id}')" title="Edit Exercise" class="w-9 h-9 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 flex items-center justify-center text-xs transition">
+                                                <i class="fa-regular fa-pen-to-square"></i>
+                                            </button>
+                                            <button type="button" onclick="window.deleteWorkoutExercise('${ex.id}')" title="Delete Exercise" class="w-9 h-9 rounded-xl bg-slate-900 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-slate-800 hover:border-rose-500/30 flex items-center justify-center text-xs transition">
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <!-- Category Footer: Group-Level Finish / Finished (Undo) Button -->
+                        <div class="px-4 sm:px-6 py-3.5 bg-slate-950/75 border-t border-slate-800/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="text-xs text-slate-400 flex items-center gap-2">
+                                <i class="fa-solid ${isGroupFinished ? 'fa-circle-check text-emerald-400' : 'fa-list-check text-slate-400'}"></i>
+                                <span>
+                                    ${isGroupFinished
+                                        ? `All ${escapeHtml(group.displayTitle)} exercises completed!`
+                                        : `Complete all ${escapeHtml(group.displayTitle)} exercises at once:`}
+                                </span>
+                            </div>
+                            <button type="button" onclick="window.toggleCategoryFinish(decodeURIComponent('${encodedCategory}'))" class="w-full sm:w-auto px-5 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition ${
+                                isGroupFinished
+                                    ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/50'
+                                    : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/20 active:scale-95'
+                            }">
+                                <i class="fa-solid ${isGroupFinished ? 'fa-rotate-left' : 'fa-check-double'}"></i>
+                                <span>${isGroupFinished ? 'Finished (Undo)' : 'Finish'}</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- WORKOUT MODAL & CRUD FUNCTIONS ---
+        function openWorkoutModal() {
+            const modal = document.getElementById('workout-modal');
+            if (!modal) return;
+
+            document.getElementById('edit-exercise-id').value = '';
+            document.getElementById('workout-modal-title').textContent = 'Add New Workout Exercise';
+            document.getElementById('workout-modal-submit-text').textContent = 'Add Exercise';
+            document.getElementById('modal-day').value = currentWorkoutDay;
+            document.getElementById('modal-category').value = '';
+            document.getElementById('modal-name').value = '';
+            document.getElementById('modal-steps').value = '';
+            document.getElementById('modal-reps').value = '';
+            document.getElementById('modal-weight').value = '';
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                const catInput = document.getElementById('modal-category');
+                if (catInput) catInput.focus();
+            }, 50);
+        }
+
+        function openWorkoutModalForCategory(categoryTitle) {
+            openWorkoutModal();
+            document.getElementById('modal-category').value = categoryTitle || '';
+            setTimeout(() => {
+                const nameInput = document.getElementById('modal-name');
+                if (nameInput) nameInput.focus();
+            }, 50);
+        }
+
+        function openEditWorkoutModal(exerciseId) {
+            const item = appData.workouts.find(w => w.id === exerciseId);
+            if (!item) return;
+
+            const modal = document.getElementById('workout-modal');
+            if (!modal) return;
+
+            document.getElementById('edit-exercise-id').value = item.id;
+            document.getElementById('workout-modal-title').textContent = 'Edit Exercise';
+            document.getElementById('workout-modal-submit-text').textContent = 'Save Changes';
+            document.getElementById('modal-day').value = item.day;
+            document.getElementById('modal-category').value = item.category;
+            document.getElementById('modal-name').value = item.name;
+            document.getElementById('modal-steps').value = item.steps;
+            document.getElementById('modal-reps').value = item.reps;
+            document.getElementById('modal-weight').value = item.weight;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                const nameInput = document.getElementById('modal-name');
+                if (nameInput) nameInput.focus();
+            }, 50);
+        }
+
+        function editExercise(exerciseId) {
+            openEditWorkoutModal(exerciseId);
+        }
+
+        function closeWorkoutModal() {
+            const modal = document.getElementById('workout-modal');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function fillCategoryChip(chipText) {
+            document.getElementById('modal-category').value = chipText;
+            document.getElementById('modal-name').focus();
+        }
+
+        function handleWorkoutSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('edit-exercise-id').value;
+            const selectedDay = document.getElementById('modal-day').value;
+            const rawCategory = document.getElementById('modal-category').value.trim();
+            const name = document.getElementById('modal-name').value.trim();
+            const steps = document.getElementById('modal-steps').value.trim();
+            const reps = document.getElementById('modal-reps').value.trim();
+            const weight = document.getElementById('modal-weight').value.trim();
+
+            if (!rawCategory || !name) return;
+
+            const existingSameGroup = appData.workouts.find(
+                w => w.day === selectedDay && normalizeCategoryKey(w.category) === normalizeCategoryKey(rawCategory) && w.id !== editId
+            );
+            const canonicalCategory = existingSameGroup ? existingSameGroup.category : rawCategory;
+
+            if (editId) {
+                const idx = appData.workouts.findIndex(w => w.id === editId);
+                if (idx !== -1) {
+                    appData.workouts[idx] = {
+                        ...appData.workouts[idx],
+                        day: selectedDay,
+                        category: canonicalCategory,
+                        name,
+                        steps: Number(steps) || 1,
+                        reps,
+                        weight: Number(weight) || 0
+                    };
+                }
+                showToast(`Updated "${name}" in ${selectedDay} • ${canonicalCategory}`);
+            } else {
+                const newExercise = {
+                    id: 'w_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+                    day: selectedDay,
+                    category: canonicalCategory,
+                    name,
+                    steps: Number(steps) || 1,
+                    reps,
+                    weight: Number(weight) || 0,
+                    finished: false,
+                    finishedAt: null
+                };
+                appData.workouts.push(newExercise);
+                showToast(`Added "${name}" under ${selectedDay} • ${canonicalCategory}!`);
+            }
+
+            currentWorkoutDay = selectedDay;
+            saveData();
+            closeWorkoutModal();
+            renderWorkoutPage();
+        }
+
+        function toggleCategoryFinish(categoryTitle) {
+            const targetKey = normalizeCategoryKey(categoryTitle);
+            const groupItems = appData.workouts.filter(
+                w => w.day === currentWorkoutDay && normalizeCategoryKey(w.category) === targetKey
+            );
+            if (groupItems.length === 0) return;
+
+            const currentlyAllFinished = groupItems.every(w => w.finished);
+            const newStatus = !currentlyAllFinished;
+            const timeStamp = get24HourTime();
+
+            const newlyFinishedList = [];
+
+            appData.workouts.forEach(w => {
+                if (w.day === currentWorkoutDay && normalizeCategoryKey(w.category) === targetKey) {
+                    w.finished = newStatus;
+                    w.finishedAt = newStatus ? timeStamp : null;
+                    if (newStatus) newlyFinishedList.push(w);
+                }
+            });
+
+            saveData();
+            renderWorkoutPage();
+
+            if (newStatus) {
+                showToast(`All ${categoryTitle} exercises marked as Finished!`);
+                if (isSheetAutoSyncEnabled() && getGoogleSheetUrl()) {
+                    sendToGoogleSheet(newlyFinishedList, [], `Auto-synced ${categoryTitle} to Google Sheets!`);
+                }
+            } else {
+                showToast(`All ${categoryTitle} exercises undone`, 'amber');
+            }
+        }
+
+        function toggleSingleExerciseFinish(exerciseId) {
+            const item = appData.workouts.find(w => w.id === exerciseId);
+            if (!item) return;
+            item.finished = !item.finished;
+            item.finishedAt = item.finished ? get24HourTime() : null;
+            saveData();
+            renderWorkoutPage();
+            if (item.finished) {
+                showToast(`"${item.name}" marked as Finished!`);
+                if (isSheetAutoSyncEnabled() && getGoogleSheetUrl()) {
+                    sendToGoogleSheet([item], [], `Auto-synced "${item.name}" to Google Sheets!`);
+                }
+            } else {
+                showToast(`"${item.name}" status undone`, 'amber');
+            }
+        }
+
+        function deleteWorkoutExercise(exerciseId) {
+            appData.workouts = appData.workouts.filter(w => w.id !== exerciseId);
+            saveData();
+            renderWorkoutPage();
+            showToast('Exercise deleted', 'amber');
+        }
+
+
+        // ==========================================================
+        // PAGE 2: DIET & MEAL PLAN LOGIC & RENDERING
+        // ==========================================================
+        function changeDietDay(day) {
+            currentDietDay = day;
+            document.getElementById('diet-day-select').value = day;
+            renderDietPage();
+        }
+
+        function renderDietDayPills() {
+            const container = document.getElementById('diet-day-pills');
+            container.innerHTML = DAYS_LIST.map(day => {
+                const count = appData.meals.filter(m => m.day === day).length;
+                const isSelected = day === currentDietDay;
+
+                return `
+                    <button type="button" onclick="window.changeDietDay('${day}')" class="flex-shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold border transition flex items-center gap-2 ${
+                        isSelected
+                            ? 'bg-amber-400/20 border-amber-400 text-amber-300 shadow-sm'
+                            : 'bg-slate-900/70 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                    }">
+                        <span>${day}</span>
+                        ${count > 0 ? `<span class="px-1.5 py-0.5 text-[10px] rounded-full bg-amber-400 text-slate-950 font-extrabold">${count}</span>` : ''}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function hasMealText(meal) {
+            if (!meal) return false;
+            return (String(meal.title || '').trim() !== '' || String(meal.content || '').trim() !== '') && Boolean(meal.savedAt);
+        }
+
+        function renderDietPage() {
+            document.getElementById('diet-day-select').value = currentDietDay;
+            renderDietDayPills();
+
+            const dayMeals = appData.meals.filter(m => m.day === currentDietDay);
+            const container = document.getElementById('diet-boxes-container');
+
+            if (dayMeals.length === 0) {
+                container.innerHTML = `
+                    <div class="md:col-span-2 glass-card rounded-3xl p-8 sm:p-12 text-center border border-dashed border-slate-700/80 space-y-4">
+                        <div class="w-16 h-16 rounded-3xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto text-2xl">
+                            <i class="fa-solid fa-utensils"></i>
+                        </div>
+                        <div class="space-y-1 max-w-md mx-auto">
+                            <h3 class="text-lg font-bold text-white">No Meal Text Boxes for ${currentDietDay} Yet</h3>
+                            <p class="text-xs sm:text-sm text-slate-400">
+                                Click <strong>+ New Text Box</strong> to summon as many meal boxes as you want (e.g., First Meal, Second Meal, Third Meal) and write down what you eat.
+                            </p>
+                        </div>
+                        <button type="button" onclick="window.addMealTextBox()" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-sm shadow-lg shadow-amber-500/20 transition">
+                            <i class="fa-solid fa-plus"></i> + New Text Box
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = dayMeals.map((meal, index) => {
+                const showSavedBadge = hasMealText(meal);
+
+                return `
+                    <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-800 hover:border-amber-500/40 transition flex flex-col justify-between gap-4 shadow-lg">
+                        
+                        <div class="space-y-3">
+                            <!-- Top Row: Meal Badge & Delete Button -->
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-extrabold">
+                                    <i class="fa-solid fa-bowl-rice"></i>
+                                    ${currentDietDay} • Meal #${index + 1}
+                                </span>
+                                <button type="button" onclick="window.deleteMealBox('${meal.id}')" title="Delete this Text Box" class="w-9 h-9 rounded-xl bg-slate-900 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-slate-800 flex items-center justify-center text-xs transition active:scale-95">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                            </div>
+
+                            <!-- Meal Title Input -->
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-400 mb-1">
+                                    Meal Title (e.g., First Meal, Second Meal)
+                                </label>
+                                <input
+                                    type="text"
+                                    value="${escapeHtml(meal.title)}"
+                                    oninput="window.updateMealBox('${meal.id}', 'title', this.value)"
+                                    placeholder="e.g., First Meal (Breakfast)..."
+                                    class="w-full min-h-[44px] bg-slate-900/90 border border-slate-700 focus:border-amber-400 text-white font-bold text-base sm:text-sm rounded-2xl px-4 py-2.5 outline-none transition placeholder:text-slate-500"
+                                >
+                            </div>
+
+                            <!-- Meal Description Textarea -->
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-400 mb-1">
+                                    Food / Meal Details (Text Box)
+                                </label>
+                                <textarea
+                                    rows="4"
+                                    oninput="window.updateMealBox('${meal.id}', 'content', this.value)"
+                                    placeholder="Write what you ate for this meal... (e.g., 3 boiled eggs, 1 bowl of oats, grilled chicken breast...)"
+                                    class="w-full bg-slate-900/90 border border-slate-700 focus:border-amber-400 text-slate-100 text-base sm:text-sm rounded-2xl p-3.5 sm:p-4 outline-none transition resize-y placeholder:text-slate-500"
+                                >${escapeHtml(meal.content)}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Card Bottom Footer: Saved (HH:MM) ONLY shown after typing text -->
+                        <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2 min-h-[36px]">
+                            <div id="meal-saved-badge-${meal.id}" class="${showSavedBadge ? 'flex' : 'hidden'} items-center gap-1.5 text-xs font-bold text-emerald-400">
+                                <i class="fa-solid fa-check-double"></i>
+                                <span id="meal-saved-text-${meal.id}">Saved (${escapeHtml(meal.savedAt || '')})</span>
+                            </div>
+                            <div id="meal-empty-hint-${meal.id}" class="${showSavedBadge ? 'hidden' : 'flex'} items-center gap-1.5 text-[11px] text-slate-500">
+                                <i class="fa-regular fa-keyboard"></i>
+                                <span>Type above to auto-save</span>
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+            }).join('') + `
+                <!-- Extra Card at the end to summon another Text Box with 1 click -->
+                <button type="button" onclick="window.addMealTextBox()" class="min-h-[180px] sm:min-h-[220px] rounded-2xl sm:rounded-3xl border-2 border-dashed border-slate-800 hover:border-amber-400/60 bg-slate-900/30 hover:bg-slate-900/60 p-6 flex flex-col items-center justify-center gap-3 text-slate-400 hover:text-amber-300 transition group active:scale-95">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 group-hover:bg-amber-400 group-hover:text-slate-950 flex items-center justify-center text-xl transition">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="text-center">
+                        <p class="font-bold text-sm text-slate-200 group-hover:text-amber-300">+ New Text Box</p>
+                        <p class="text-xs text-slate-500 mt-0.5">Add another meal entry for ${currentDietDay}</p>
+                    </div>
+                </button>
+            `;
+        }
+
+        function addMealTextBox(presetTitle = '') {
+            const hasPreset = String(presetTitle || '').trim() !== '';
+            const nowTime = hasPreset ? get24HourTime() : null;
+
+            const newMeal = {
+                id: 'm_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+                day: currentDietDay,
+                title: hasPreset ? presetTitle : '',
+                content: '',
+                savedAt: nowTime
+            };
+
+            appData.meals.push(newMeal);
+            saveData();
+            renderDietPage();
+            showToast(`Summoned new meal text box for ${currentDietDay}`, 'amber');
+        }
+
+        function updateMealBox(mealId, field, value) {
+            const item = appData.meals.find(m => m.id === mealId);
+            if (!item) return;
+            item[field] = value;
+
+            const hasAnyText = String(item.title || '').trim() !== '' || String(item.content || '').trim() !== '';
+            if (hasAnyText) {
+                item.savedAt = get24HourTime();
+            } else {
+                item.savedAt = null;
+            }
+
+            saveData();
+
+            const badgeEl = document.getElementById(`meal-saved-badge-${mealId}`);
+            const textEl = document.getElementById(`meal-saved-text-${mealId}`);
+            const hintEl = document.getElementById(`meal-empty-hint-${mealId}`);
+
+            if (badgeEl && textEl && hintEl) {
+                if (hasAnyText && item.savedAt) {
+                    textEl.textContent = `Saved (${item.savedAt})`;
+                    badgeEl.classList.remove('hidden');
+                    badgeEl.classList.add('flex');
+                    hintEl.classList.add('hidden');
+                    hintEl.classList.remove('flex');
+                } else {
+                    badgeEl.classList.add('hidden');
+                    badgeEl.classList.remove('flex');
+                    hintEl.classList.remove('hidden');
+                    hintEl.classList.add('flex');
+                }
+            }
+        }
+
+        function deleteMealBox(mealId) {
+            appData.meals = appData.meals.filter(m => m.id !== mealId);
+            saveData();
+            renderDietPage();
+            showToast('Meal text box removed', 'amber');
+        }
+
+
+        // ==========================================================
+        // PAGE 3: WEEKLY & DAILY HISTORY LOG PAGE
+        // ==========================================================
+        function updateHistoryBadge() {
+            const finishedCount = appData.workouts.filter(w => w.finished).length;
+            const badge = document.getElementById('nav-history-badge');
+            if (!badge) return;
+            if (finishedCount > 0) {
+                badge.textContent = finishedCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function renderHistoryPage() {
+            const dayFilter = document.getElementById('history-day-filter').value;
+            updateSheetStatusIndicator();
+
+            // Calculate Weekly Stats across all 7 days (ONLY 2 STAT CARDS)
+            const totalWorkouts = appData.workouts.length;
+            const totalFinishedWorkouts = appData.workouts.filter(w => w.finished).length;
+            const totalMealsLogged = appData.meals.filter(m => m.content.trim() !== '' || m.title.trim() !== '').length;
+
+            const statsContainer = document.getElementById('history-weekly-stats');
+            statsContainer.innerHTML = `
+                <div class="glass-card rounded-2xl p-4 sm:p-5 border border-emerald-500/30">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400">Finished Exercises</span>
+                        <span class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-check-double"></i>
+                        </span>
+                    </div>
+                    <p class="text-2xl sm:text-3xl font-extrabold text-white mt-2">${totalFinishedWorkouts} <span class="text-xs font-normal text-slate-400">/ ${totalWorkouts} Total</span></p>
+                    <p class="text-[11px] text-emerald-400 mt-1">Completed exercises across the week</p>
+                </div>
+
+                <div class="glass-card rounded-2xl p-4 sm:p-5 border border-amber-500/30">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400">Meals Logged</span>
+                        <span class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-utensils"></i>
+                        </span>
+                    </div>
+                    <p class="text-2xl sm:text-3xl font-extrabold text-white mt-2">${totalMealsLogged} <span class="text-xs font-normal text-slate-400">Meals</span></p>
+                    <p class="text-[11px] text-amber-300 mt-1">Total meal entries recorded</p>
+                </div>
+            `;
+
+            const daysToRender = dayFilter === 'ALL' ? DAYS_LIST : [dayFilter];
+            const container = document.getElementById('history-days-container');
+
+            container.innerHTML = daysToRender.map(day => {
+                // ONLY FINISHED workouts for this day!
+                const finishedDayWorkouts = appData.workouts.filter(w => w.day === day && w.finished === true);
+
+                // Group finished workouts by Category Title
+                const groupMap = new Map();
+                finishedDayWorkouts.forEach(w => {
+                    const k = normalizeCategoryKey(w.category);
+                    if (!groupMap.has(k)) {
+                        groupMap.set(k, { title: w.category, list: [] });
+                    }
+                    groupMap.get(k).list.push(w);
+                });
+                const workoutGroups = Array.from(groupMap.values());
+
+                // Logged meals for this day (non-empty title or content)
+                const dayMeals = appData.meals.filter(
+                    m => m.day === day && (String(m.title || '').trim() !== '' || String(m.content || '').trim() !== '')
+                );
+
+                const hasActivity = workoutGroups.length > 0 || dayMeals.length > 0;
+
+                return `
+                    <div class="glass-card rounded-2xl sm:rounded-3xl overflow-hidden border ${hasActivity ? 'border-slate-700/90' : 'border-slate-800/60 opacity-85'}">
+                        
+                        <!-- Day Banner Header with Sync to Sheet & Day Restart Button -->
+                        <div class="p-4 sm:px-6 sm:py-4 bg-slate-900/95 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <span class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-extrabold text-xs sm:text-sm flex-shrink-0">
+                                    ${day}
+                                </span>
+                                <div class="min-w-0">
+                                    <h3 class="text-sm sm:text-lg font-bold text-white truncate">${day} Summary Log</h3>
+                                    <p class="text-xs text-slate-400">
+                                        ${finishedDayWorkouts.length} Finished Exercises • ${dayMeals.length} Meals Logged
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons: Go to Workouts, Go to Diet, Sync to Sheet, and Day Restart -->
+                            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                                <button type="button" onclick="window.jumpToDayPage('workout', '${day}')" class="flex-1 sm:flex-initial min-h-[38px] text-xs px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-300 border border-slate-700 transition text-center">
+                                    <i class="fa-solid fa-dumbbell mr-1"></i> Workouts
+                                </button>
+                                <button type="button" onclick="window.jumpToDayPage('diet', '${day}')" class="flex-1 sm:flex-initial min-h-[38px] text-xs px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 text-slate-300 hover:text-amber-300 border border-slate-700 transition text-center">
+                                    <i class="fa-solid fa-utensils mr-1"></i> Diet
+                                </button>
+                                <button type="button" onclick="window.syncDayToSheet('${day}')" class="flex-1 sm:flex-initial min-h-[38px] text-xs px-3.5 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500 hover:text-slate-950 text-emerald-300 border border-emerald-500/40 font-extrabold transition flex items-center justify-center gap-1.5 active:scale-95">
+                                    <i class="fa-solid fa-file-excel"></i>
+                                    <span>Sync to Sheet</span>
+                                </button>
+                                <button type="button" onclick="window.openRestartModal('${day}')" class="flex-1 sm:flex-initial min-h-[38px] text-xs px-3.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500 hover:text-slate-950 text-amber-300 border border-amber-500/40 font-extrabold transition flex items-center justify-center gap-1.5 active:scale-95">
+                                    <i class="fa-solid fa-rotate-left"></i>
+                                    <span>Restart</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Two-Column Body: Left = Finished Workouts Log, Right = Diet Meals Log -->
+                        <div class="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
+                            
+                            <!-- Column 1: Finished Workouts Record ONLY -->
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                                    <h4 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+                                        <i class="fa-solid fa-dumbbell"></i> Finished Workouts Log
+                                    </h4>
+                                    <span class="text-xs text-slate-400">${finishedDayWorkouts.length} Completed</span>
+                                </div>
+
+                                ${workoutGroups.length === 0 ? `
+                                    <div class="rounded-2xl bg-slate-900/50 border border-slate-800/80 p-5 text-center text-xs text-slate-500">
+                                        No finished exercises recorded yet.
+                                    </div>
+                                ` : workoutGroups.map(wg => `
+                                    <div class="rounded-2xl bg-slate-900/80 border border-emerald-500/40 p-4 space-y-2.5">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-extrabold text-sm text-white flex items-center gap-2">
+                                                <i class="fa-solid fa-layer-group text-emerald-400 text-xs"></i>
+                                                ${escapeHtml(wg.title)}
+                                            </span>
+                                            <span class="px-2.5 py-0.5 rounded-full font-bold text-[11px] bg-emerald-500 text-slate-950">
+                                                ${wg.list.length} Finished
+                                            </span>
+                                        </div>
+                                        <div class="divide-y divide-slate-800/80 text-xs">
+                                            ${wg.list.map(ex => `
+                                                <div class="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                                    <div class="flex items-center gap-2 flex-wrap">
+                                                        <i class="fa-solid fa-circle-check text-emerald-400 text-xs"></i>
+                                                        <span class="font-semibold text-slate-100">${escapeHtml(ex.name)}</span>
+                                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                                            Finished${ex.finishedAt ? ` (${escapeHtml(ex.finishedAt)})` : ''}
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                                        <span class="px-2 py-0.5 rounded bg-slate-800 text-emerald-300">${escapeHtml(ex.steps)} Steps</span>
+                                                        <span class="px-2 py-0.5 rounded bg-slate-800 text-cyan-300">${escapeHtml(ex.reps)} Reps</span>
+                                                        <span class="px-2 py-0.5 rounded bg-slate-800 text-amber-300">${escapeHtml(ex.weight)} kg</span>
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <!-- Column 2: Meals Record with Saved (HH:MM) Timestamp -->
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                                    <h4 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                                        <i class="fa-solid fa-bowl-food"></i> Recorded Meals Log
+                                    </h4>
+                                    <span class="text-xs text-slate-400">${dayMeals.length} Meals</span>
+                                </div>
+
+                                ${dayMeals.length === 0 ? `
+                                    <div class="rounded-2xl bg-slate-900/50 border border-slate-800/80 p-5 text-center text-xs text-slate-500">
+                                        No meals recorded for ${day}.
+                                    </div>
+                                ` : dayMeals.map((meal, mIdx) => `
+                                    <div class="rounded-2xl bg-slate-900/80 border border-slate-800 p-3.5 sm:p-4 space-y-2">
+                                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                                            <span class="font-bold text-sm text-amber-300 flex items-center gap-2">
+                                                <span class="w-5 h-5 rounded-md bg-amber-400/20 text-amber-300 flex-shrink-0 flex items-center justify-center text-[11px] font-extrabold">${mIdx + 1}</span>
+                                                <span class="break-words">${escapeHtml(meal.title || `Meal #${mIdx + 1}`)}</span>
+                                            </span>
+                                            ${meal.savedAt ? `
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold">
+                                                    <i class="fa-solid fa-check-double text-[10px]"></i>
+                                                    Saved (${escapeHtml(meal.savedAt)})
+                                                </span>
+                                            ` : ''}
+                                        </div>
+                                        <p class="text-xs sm:text-sm text-slate-200 whitespace-pre-line pl-7 break-words">
+                                            ${meal.content.trim() ? escapeHtml(meal.content) : '<span class="italic text-slate-500">No meal description entered...</span>'}
+                                        </p>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function jumpToDayPage(targetPage, day) {
+            if (targetPage === 'workout') {
+                currentWorkoutDay = day;
+                switchPage('workout');
+            } else if (targetPage === 'diet') {
+                currentDietDay = day;
+                switchPage('diet');
+            }
+        }
+
+        // --- RESTART DAY & RESTART ALL 7 DAYS LOGIC ---
+        function openRestartModal(target) {
+            pendingRestartTarget = target;
+            const titleEl = document.getElementById('restart-modal-title');
+            const descEl = document.getElementById('restart-modal-desc');
+
+            if (target === 'ALL') {
+                titleEl.textContent = 'Restart All 7 Days?';
+                descEl.innerHTML = 'All exercises across <strong>Day 1 to Day 7</strong> will stay saved, their status will reset to <strong>Finish (Undo)</strong>, and all Diet Plan entries across the 7 days will be cleared.';
+            } else {
+                titleEl.textContent = `Restart ${target}?`;
+                descEl.innerHTML = `All exercises in <strong>${target}</strong> will stay saved, their status will reset to <strong>Finish (Undo)</strong>, and Diet Plan entries for <strong>${target}</strong> will be cleared.`;
+            }
+
+            const modal = document.getElementById('restart-confirm-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeRestartModal() {
+            pendingRestartTarget = null;
+            const modal = document.getElementById('restart-confirm-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function confirmRestartAction() {
+            if (!pendingRestartTarget) return;
+
+            if (pendingRestartTarget === 'ALL') {
+                appData.workouts.forEach(w => {
+                    w.finished = false;
+                    w.finishedAt = null;
+                });
+                appData.meals = [];
+                saveData();
+                renderWorkoutPage();
+                renderDietPage();
+                renderHistoryPage();
+                showToast('All 7 Days restarted! Exercises undone & diet logs cleared.', 'amber');
+            } else {
+                const targetDay = pendingRestartTarget;
+                appData.workouts.forEach(w => {
+                    if (w.day === targetDay) {
+                        w.finished = false;
+                        w.finishedAt = null;
+                    }
+                });
+                appData.meals = appData.meals.filter(m => m.day !== targetDay);
+                saveData();
+                renderWorkoutPage();
+                renderDietPage();
+                renderHistoryPage();
+                showToast(`${targetDay} restarted! Exercises undone & diet logs cleared.`, 'amber');
+            }
+
+            closeRestartModal();
+        }
+
+        // ==========================================================
+        // GOOGLE SHEETS LIVE SYNC FUNCTIONS
+        // ==========================================================
+        function getGoogleSheetUrl() {
+            return (localStorage.getItem(SHEET_URL_STORAGE_KEY) || DEFAULT_GOOGLE_SHEET_WEB_APP_URL || '').trim();
+        }
+
+        function isSheetAutoSyncEnabled() {
+            const val = localStorage.getItem(SHEET_AUTOSYNC_STORAGE_KEY);
+            return val === null ? true : val === 'true';
+        }
+
+        function updateSheetStatusIndicator() {
+            const dot = document.getElementById('sheet-status-dot');
+            if (!dot) return;
+            const hasUrl = Boolean(getGoogleSheetUrl());
+            dot.className = `w-2.5 h-2.5 rounded-full ${hasUrl ? 'bg-emerald-400 shadow-sm shadow-emerald-400' : 'bg-slate-500'}`;
+        }
+
+        function openSheetsModal() {
+            const modal = document.getElementById('sheets-setup-modal');
+            if (!modal) return;
+            document.getElementById('google-sheet-url-input').value = getGoogleSheetUrl();
+            document.getElementById('google-sheet-autosync-checkbox').checked = isSheetAutoSyncEnabled();
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeSheetsModal() {
+            const modal = document.getElementById('sheets-setup-modal');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function saveGoogleSheetSettings() {
+            const urlVal = document.getElementById('google-sheet-url-input').value.trim();
+            const autoSyncVal = document.getElementById('google-sheet-autosync-checkbox').checked;
+
+            localStorage.setItem(SHEET_URL_STORAGE_KEY, urlVal);
+            localStorage.setItem(SHEET_AUTOSYNC_STORAGE_KEY, String(autoSyncVal));
+            updateSheetStatusIndicator();
+            closeSheetsModal();
+            showToast(urlVal ? 'Google Sheets connection saved!' : 'Google Sheets URL cleared', urlVal ? 'success' : 'amber');
+        }
+
+        async function sendToGoogleSheet(workoutsArray, mealsArray, successMsg = 'Synced to Google Sheets!') {
+            const scriptUrl = getGoogleSheetUrl();
+            if (!scriptUrl) {
+                showToast('Please set your Google Sheet Web App URL in Sheets Setup first!', 'amber');
+                openSheetsModal();
+                return;
+            }
+
+            const now = new Date();
+            const payload = {
+                date: now.toISOString().split('T')[0],
+                time: get24HourTime(),
+                workouts: workoutsArray.map(w => ({
+                    day: w.day,
+                    category: w.category || 'General',
+                    title: w.category || 'General',
+                    name: w.name || '',
+                    steps: w.steps || '',
+                    reps: w.reps || '',
+                    weight: w.weight || '',
+                    finishedAt: w.finishedAt || get24HourTime()
+                })),
+                diets: mealsArray.map(m => ({
+                    day: m.day,
+                    title: m.title || 'Meal',
+                    content: m.content || '',
+                    savedAt: m.savedAt || get24HourTime(),
+                    updatedAt: m.savedAt || get24HourTime()
+                }))
+            };
+
+            try {
+                showToast('Syncing to Google Sheets...', 'amber');
+                await fetch(scriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+                showToast(successMsg, 'success');
+            } catch (err) {
+                console.error('Google Sheets Sync Error:', err);
+                showToast('Failed to sync with Google Sheets', 'amber');
+            }
+        }
+
+        function syncDayToSheet(day) {
+            const finishedWorkouts = appData.workouts.filter(w => w.day === day && w.finished === true);
+            const loggedMeals = appData.meals.filter(
+                m => m.day === day && (String(m.title || '').trim() !== '' || String(m.content || '').trim() !== '')
+            );
+
+            if (finishedWorkouts.length === 0 && loggedMeals.length === 0) {
+                showToast(`No finished workouts or meals to sync for ${day}`, 'amber');
+                return;
+            }
+
+            sendToGoogleSheet(finishedWorkouts, loggedMeals, `${day} synced to Google Sheets!`);
+        }
+
+        function syncAllDaysToSheet() {
+            const allFinishedWorkouts = appData.workouts.filter(w => w.finished === true);
+            const allLoggedMeals = appData.meals.filter(
+                m => String(m.title || '').trim() !== '' || String(m.content || '').trim() !== ''
+            );
+
+            if (allFinishedWorkouts.length === 0 && allLoggedMeals.length === 0) {
+                showToast('No finished workouts or meals across 7 days to sync', 'amber');
+                return;
+            }
+
+            sendToGoogleSheet(allFinishedWorkouts, allLoggedMeals, 'All 7 Days synced to Google Sheets!');
+        }
+
+        function testGoogleSheetConnection() {
+            const urlInput = document.getElementById('google-sheet-url-input').value.trim();
+            if (!urlInput) {
+                showToast('Paste your Web App URL first!', 'amber');
+                return;
+            }
+            localStorage.setItem(SHEET_URL_STORAGE_KEY, urlInput);
+            updateSheetStatusIndicator();
+            sendToGoogleSheet(
+                [{ day: 'Day 1', category: 'Test Connection', name: 'Sample Bench Press', steps: 4, reps: '10', weight: 50, finishedAt: get24HourTime() }],
+                [],
+                'Test row sent! Check your Google Sheet.'
+            );
+        }
+
+        function copyAppsScriptCode() {
+            const scriptCode = `function doGet(e) {
+  return ContentService.createTextOutput("FITFORGE Google Sheets Sync is Active!").setMimeType(ContentService.MimeType.TEXT);
+}
+
+function doPost(e) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var payload = JSON.parse(e.postData.contents);
+    var dateStr = payload.date || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
+    var timeStr = payload.time || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "HH:mm");
+
+    var workoutSheet = ss.getSheetByName("Workouts_Log");
+    if (!workoutSheet) {
+      workoutSheet = ss.insertSheet("Workouts_Log");
+      workoutSheet.appendRow(["Date", "Synced Time", "Day", "Category", "Exercise Name", "Steps (Sets)", "Reps", "Weight (kg)", "Finished Time"]);
+      workoutSheet.getRange("A1:I1").setFontWeight("bold").setBackground("#10b981").setFontColor("#ffffff");
+      workoutSheet.setFrozenRows(1);
+    }
+
+    var dietSheet = ss.getSheetByName("Diet_Log");
+    if (!dietSheet) {
+      dietSheet = ss.insertSheet("Diet_Log");
+      dietSheet.appendRow(["Date", "Synced Time", "Day", "Meal Title", "Food / Meal Details", "Saved Time"]);
+      dietSheet.getRange("A1:F1").setFontWeight("bold").setBackground("#f59e0b").setFontColor("#ffffff");
+      dietSheet.setFrozenRows(1);
+    }
+
+    if (payload.workouts && payload.workouts.length > 0) {
+      payload.workouts.forEach(function(w) {
+        workoutSheet.appendRow([
+          dateStr,
+          timeStr,
+          w.day || "",
+          w.category || w.title || "General",
+          w.name || "",
+          w.steps || "",
+          w.reps || "",
+          w.weight || "",
+          w.finishedAt || timeStr
+        ]);
+      });
+    }
+
+    if (payload.diets && payload.diets.length > 0) {
+      payload.diets.forEach(function(d) {
+        dietSheet.appendRow([
+          dateStr,
+          timeStr,
+          d.day || "",
+          d.title || "Meal",
+          d.content || "",
+          d.savedAt || d.updatedAt || timeStr
+        ]);
+      });
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+            navigator.clipboard.writeText(scriptCode).then(() => {
+                showToast('Apps Script code copied to clipboard!');
+            }).catch(() => {
+                showToast('Could not copy automatically', 'amber');
+            });
+        }
+
+        // --- EXPOSE ALL HANDLERS TO GLOBAL WINDOW OBJECT ---
+        window.switchPage = switchPage;
+        window.changeWorkoutDay = changeWorkoutDay;
+        window.openWorkoutModal = openWorkoutModal;
+        window.openWorkoutModalForCategory = openWorkoutModalForCategory;
+        window.openEditWorkoutModal = openEditWorkoutModal;
+        window.editExercise = editExercise;
+        window.closeWorkoutModal = closeWorkoutModal;
+        window.fillCategoryChip = fillCategoryChip;
+        window.handleWorkoutSubmit = handleWorkoutSubmit;
+        window.toggleCategoryFinish = toggleCategoryFinish;
+        window.toggleSingleExerciseFinish = toggleSingleExerciseFinish;
+        window.deleteWorkoutExercise = deleteWorkoutExercise;
+        window.changeDietDay = changeDietDay;
+        window.addMealTextBox = addMealTextBox;
+        window.updateMealBox = updateMealBox;
+        window.deleteMealBox = deleteMealBox;
+        window.renderHistoryPage = renderHistoryPage;
+        window.jumpToDayPage = jumpToDayPage;
+        window.openRestartModal = openRestartModal;
+        window.closeRestartModal = closeRestartModal;
+        window.confirmRestartAction = confirmRestartAction;
+        window.openSheetsModal = openSheetsModal;
+        window.closeSheetsModal = closeSheetsModal;
+        window.saveGoogleSheetSettings = saveGoogleSheetSettings;
+        window.syncDayToSheet = syncDayToSheet;
+        window.syncAllDaysToSheet = syncAllDaysToSheet;
+        window.testGoogleSheetConnection = testGoogleSheetConnection;
+        window.copyAppsScriptCode = copyAppsScriptCode;
+
+        // Close modals on Escape key
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeWorkoutModal();
+                closeRestartModal();
+                closeSheetsModal();
+            }
+        });
+
+        // --- INITIALIZE APP ON LOAD ---
+        window.onload = function () {
+            loadData();
+            updateHistoryBadge();
+            updateSheetStatusIndicator();
+            renderWorkoutPage();
+        };
+    </script>
+</body>
+</html>
