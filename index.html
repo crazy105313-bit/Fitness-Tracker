@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="dark only">
-    <meta name="supported-color-schemes" content="dark">
+    <meta name="color-scheme" content="dark">
     <title>FITFORGE — 7-Day Workout & Diet Tracker</title>
-
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter -->
@@ -30,10 +28,11 @@
     </script>
 
     <style>
-        :root, html, body, * {
-            color-scheme: only dark !important;
-            forced-color-adjust: none !important;
-            -webkit-forced-color-adjust: none !important;
+        :root {
+            color-scheme: dark;
+            --emerald-png: none;
+            --amber-png: none;
+            --cyan-png: none;
         }
 
         html, body {
@@ -66,10 +65,10 @@
         }
 
         .glass-card {
-            background: rgba(15, 23, 42, 0.85) !important;
+            background: rgba(15, 23, 42, 0.82) !important;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(51, 65, 85, 0.75) !important;
+            border: 1px solid rgba(51, 65, 85, 0.7) !important;
         }
 
         .glass-modal {
@@ -77,6 +76,47 @@
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(71, 85, 105, 0.85) !important;
+        }
+
+        /* Anti-Force-Dark Vivid Buttons (Uses 120x120 Canvas PNG so Android WebView NEVER inverts them) */
+        .btn-emerald-vivid {
+            background-color: rgba(16, 185, 129, 0.28) !important;
+            background-image: var(--emerald-png) !important;
+            background-size: 100% 100% !important;
+            border: 1.5px solid #34d399 !important;
+            color: #ffffff !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+        }
+
+        .btn-amber-vivid {
+            background-color: rgba(245, 158, 11, 0.28) !important;
+            background-image: var(--amber-png) !important;
+            background-size: 100% 100% !important;
+            border: 1.5px solid #fbbf24 !important;
+            color: #ffffff !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+        }
+
+        .btn-cyan-vivid {
+            background-color: rgba(6, 182, 212, 0.28) !important;
+            background-image: var(--cyan-png) !important;
+            background-size: 100% 100% !important;
+            border: 1.5px solid #22d3ee !important;
+            color: #ffffff !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+        }
+
+        /* Anti-Force-Dark Pill Counter Badge (Prevents turning white on mobile) */
+        .pill-badge-dark {
+            background-color: rgba(16, 185, 129, 0.18) !important;
+            border: 1px solid rgba(52, 211, 153, 0.4) !important;
+            color: #6ee7b7 !important;
+        }
+
+        .pill-badge-amber {
+            background-color: rgba(245, 158, 11, 0.2) !important;
+            border: 1px solid rgba(251, 191, 36, 0.45) !important;
+            color: #fde68a !important;
         }
 
         @keyframes subtlePulse {
@@ -91,8 +131,36 @@
             transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
         }
     </style>
+
+    <script>
+        // Generate 120x120 raster PNG gradients immediately so Mobile Force-Dark never inverts buttons
+        (function initAntiForceDarkGradients() {
+            function makeGradientPng(c1, c2) {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 120;
+                    canvas.height = 120;
+                    const ctx = canvas.getContext('2d');
+                    const grad = ctx.createLinearGradient(0, 0, 120, 120);
+                    grad.addColorStop(0, c1);
+                    grad.addColorStop(1, c2);
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(0, 0, 120, 120);
+                    return 'url("' + canvas.toDataURL('image/png') + '")';
+                } catch (e) {
+                    return 'none';
+                }
+            }
+            document.addEventListener('DOMContentLoaded', function() {
+                const root = document.documentElement;
+                root.style.setProperty('--emerald-png', makeGradientPng('#10b981', '#059669'));
+                root.style.setProperty('--amber-png', makeGradientPng('#f59e0b', '#d97706'));
+                root.style.setProperty('--cyan-png', makeGradientPng('#06b6d4', '#0d9488'));
+            });
+        })();
+    </script>
 </head>
-<body class="min-h-screen flex flex-col bg-[#090d16] text-slate-100 selection:bg-emerald-500 selection:text-slate-950">
+<body class="min-h-screen flex flex-col bg-[#090d16] text-slate-100 selection:bg-emerald-500 selection:text-white">
 
     <!-- Background Ambient Glows -->
     <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
@@ -109,8 +177,8 @@
                 <!-- Brand Logo & Name -->
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-slate-950 shadow-lg shadow-emerald-500/20">
-                            <i class="fa-solid fa-dumbbell text-lg sm:text-xl"></i>
+                        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl btn-emerald-vivid flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                            <i class="fa-solid fa-dumbbell text-lg sm:text-xl text-white"></i>
                         </div>
                         <h1 class="text-lg sm:text-xl font-extrabold tracking-wider text-white">
                             FITFORGE
@@ -120,7 +188,7 @@
 
                 <!-- 3 Main Pages Navigation Tabs -->
                 <nav class="grid grid-cols-3 gap-1.5 sm:gap-2 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
-                    <button type="button" id="nav-workout" onclick="window.switchPage('workout')" class="tab-transition flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm bg-emerald-500 text-slate-950 shadow-md">
+                    <button type="button" id="nav-workout" onclick="window.switchPage('workout')" class="tab-transition flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm btn-emerald-vivid shadow-md">
                         <i class="fa-solid fa-dumbbell"></i>
                         <span>Workouts</span>
                     </button>
@@ -131,7 +199,7 @@
                     <button type="button" id="nav-history" onclick="window.switchPage('history')" class="tab-transition flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 relative">
                         <i class="fa-solid fa-clipboard-check"></i>
                         <span>7-Day History</span>
-                        <span id="nav-history-badge" class="hidden ml-1 px-1.5 py-0.5 text-[10px] font-extrabold rounded-full bg-amber-400 text-slate-950">0</span>
+                        <span id="nav-history-badge" class="hidden ml-1 px-1.5 py-0.5 text-[10px] font-extrabold rounded-full pill-badge-amber">0</span>
                     </button>
                 </nav>
 
@@ -161,7 +229,6 @@
 
                     <!-- Day Dropdown Selector -->
                     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        <!-- 7-Day Dropdown -->
                         <div class="relative flex-1 sm:flex-initial sm:min-w-[210px]">
                             <label for="workout-day-select" class="block text-[11px] font-medium text-slate-400 mb-1">
                                 <i class="fa-regular fa-calendar-days mr-1 text-emerald-400"></i> Select Day (Day 1 – 7)
@@ -182,21 +249,15 @@
                     </div>
                 </div>
 
-                <!-- Quick 7-Day Pill Strip (Synced with Dropdown) -->
-                <div class="mt-4 sm:mt-5 pt-4 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto pb-1" id="workout-day-pills">
-                    <!-- Rendered dynamically via JS -->
-                </div>
+                <!-- Quick 7-Day Pill Strip -->
+                <div class="mt-4 sm:mt-5 pt-4 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto pb-1" id="workout-day-pills"></div>
             </div>
 
             <!-- Day Summary Banner -->
-            <div id="workout-day-summary" class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <!-- Rendered dynamically via JS -->
-            </div>
+            <div id="workout-day-summary" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
 
             <!-- Grouped Workout Categories Container -->
-            <div id="workout-categories-container" class="space-y-5">
-                <!-- Category cards (e.g., Chest, Back, Legs) rendered dynamically here -->
-            </div>
+            <div id="workout-categories-container" class="space-y-5"></div>
 
         </section>
 
@@ -220,7 +281,6 @@
 
                     <!-- Day Dropdown Selector & New Text Box Button -->
                     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        <!-- 7-Day Dropdown -->
                         <div class="relative flex-1 sm:flex-initial sm:min-w-[190px]">
                             <label for="diet-day-select" class="block text-[11px] font-medium text-slate-400 mb-1">
                                 <i class="fa-regular fa-calendar-days mr-1 text-amber-400"></i> Select Day (Day 1 – 7)
@@ -241,20 +301,16 @@
 
                         <!-- Summon New Meal Text Box Button -->
                         <div class="pt-0 sm:pt-5 w-full sm:w-auto">
-                            <button type="button" onclick="window.addMealTextBox()" class="w-full sm:w-auto flex items-center justify-center gap-2.5 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-extrabold px-5 py-3 rounded-2xl shadow-lg shadow-amber-500/25 active:scale-95 transition">
-                                <span class="w-6 h-6 rounded-lg bg-slate-950/20 flex items-center justify-center text-base">
-                                    <i class="fa-solid fa-plus"></i>
-                                </span>
-                                <span>+ New Text Box</span>
+                            <button type="button" onclick="window.addMealTextBox()" class="w-full sm:w-auto flex items-center justify-center gap-2 btn-amber-vivid font-extrabold px-5 py-3 rounded-2xl shadow-lg shadow-amber-500/20 active:scale-95 transition">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>New Text Box</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Quick 7-Day Pill Strip for Diet (Synced with Dropdown) -->
-                <div class="mt-4 sm:mt-5 pt-4 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto pb-1" id="diet-day-pills">
-                    <!-- Rendered dynamically via JS -->
-                </div>
+                <!-- Quick 7-Day Pill Strip for Diet -->
+                <div class="mt-4 sm:mt-5 pt-4 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto pb-1" id="diet-day-pills"></div>
             </div>
 
             <!-- Quick Meal Presets Helper Bar -->
@@ -277,9 +333,7 @@
             </div>
 
             <!-- Meal Text Boxes Grid Container -->
-            <div id="diet-boxes-container" class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <!-- Dynamic Meal Text Box cards rendered here -->
-            </div>
+            <div id="diet-boxes-container" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
 
         </section>
 
@@ -328,13 +382,13 @@
                         </button>
 
                         <!-- Sync All 7 Days to Google Sheets Button -->
-                        <button type="button" onclick="window.syncAllDaysToSheet()" class="min-h-[46px] px-4 py-3 rounded-2xl bg-emerald-500/20 hover:bg-emerald-500 hover:text-slate-950 text-emerald-300 border border-emerald-500/40 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95">
+                        <button type="button" onclick="window.syncAllDaysToSheet()" class="min-h-[46px] px-4 py-3 rounded-2xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95">
                             <i class="fa-solid fa-cloud-arrow-up"></i>
                             <span>Sync 7 Days to Sheet</span>
                         </button>
 
                         <!-- Restart All 7 Days Button -->
-                        <button type="button" onclick="window.openRestartModal('ALL')" class="min-h-[46px] px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-xs sm:text-sm shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 active:scale-95 transition">
+                        <button type="button" onclick="window.openRestartModal('ALL')" class="min-h-[46px] px-5 py-3 rounded-2xl btn-amber-vivid font-extrabold text-xs sm:text-sm shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 active:scale-95 transition">
                             <i class="fa-solid fa-rotate-left"></i>
                             <span>Restart All 7 Days</span>
                         </button>
@@ -343,22 +397,18 @@
             </div>
 
             <!-- 1-Week Overview Stats Cards (ONLY 2 STAT CARDS: Finished Exercises & Meals Logged) -->
-            <div id="history-weekly-stats" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <!-- Dynamically populated -->
-            </div>
+            <div id="history-weekly-stats" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"></div>
 
             <!-- 7-Day Timeline Log Cards -->
-            <div id="history-days-container" class="space-y-4 sm:space-y-6">
-                <!-- Dynamically populated per day -->
-            </div>
+            <div id="history-days-container" class="space-y-4 sm:space-y-6"></div>
 
         </section>
 
     </main>
 
     <!-- FLOATING '+' BUTTON FOR WORKOUT PAGE -->
-    <button type="button" id="floating-add-btn" onclick="window.openWorkoutModal()" title="Add New Workout" class="fixed bottom-5 right-5 z-30 w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 text-slate-950 shadow-2xl flex items-center justify-center text-2xl font-bold hover:scale-105 active:scale-95 transition pulse-btn">
-        <i class="fa-solid fa-plus"></i>
+    <button type="button" id="floating-add-btn" onclick="window.openWorkoutModal()" title="Add New Workout" class="fixed bottom-5 right-5 z-30 w-14 h-14 rounded-2xl btn-emerald-vivid shadow-2xl flex items-center justify-center text-2xl font-bold hover:scale-105 active:scale-95 transition pulse-btn">
+        <i class="fa-solid fa-plus text-white"></i>
     </button>
 
     <!-- ========================================================== -->
@@ -489,7 +539,7 @@
                     <button type="button" onclick="window.closeWorkoutModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs sm:text-sm transition">
                         Cancel
                     </button>
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 flex items-center gap-2 transition">
+                    <button type="submit" class="px-6 py-2.5 rounded-xl btn-emerald-vivid font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 flex items-center gap-2 transition">
                         <i class="fa-solid fa-check"></i>
                         <span id="workout-modal-submit-text">Add Exercise</span>
                     </button>
@@ -515,7 +565,7 @@
                 <button type="button" onclick="window.closeRestartModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition">
                     Cancel
                 </button>
-                <button type="button" id="restart-modal-confirm-btn" onclick="window.confirmRestartAction()" class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-sm font-extrabold transition flex items-center gap-1.5">
+                <button type="button" id="restart-modal-confirm-btn" onclick="window.confirmRestartAction()" class="px-5 py-2.5 rounded-xl btn-amber-vivid text-sm font-extrabold transition flex items-center gap-1.5">
                     <i class="fa-solid fa-rotate-left"></i>
                     <span>Restart Now</span>
                 </button>
@@ -545,16 +595,20 @@
                 </button>
             </div>
 
-            <!-- Web App URL Input -->
+            <!-- Web App URL Input (type="text" so mobile browsers allow pasting easily) -->
             <div class="space-y-2">
                 <label for="google-sheet-url-input" class="block text-xs font-bold text-slate-300">
                     Google Apps Script Web App URL
                 </label>
                 <input
-                    type="url"
+                    type="text"
                     id="google-sheet-url-input"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
                     placeholder="https://script.google.com/macros/s/.../exec"
-                    class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-400 text-white text-xs sm:text-sm rounded-2xl px-4 py-3 outline-none transition placeholder:text-slate-500"
+                    class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-400 text-white text-sm rounded-2xl px-4 py-3 outline-none transition placeholder:text-slate-500 select-text"
                 >
                 <label class="flex items-center gap-2.5 pt-1 cursor-pointer select-none">
                     <input type="checkbox" id="google-sheet-autosync-checkbox" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer">
@@ -568,7 +622,7 @@
                     <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
                         <i class="fa-solid fa-code"></i> Google Sheets Apps Script Code
                     </span>
-                    <button type="button" onclick="window.copyAppsScriptCode()" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500 hover:text-slate-950 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5">
+                    <button type="button" onclick="window.copyAppsScriptCode()" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5">
                         <i class="fa-regular fa-copy"></i>
                         <span>Copy Script Code</span>
                     </button>
@@ -591,7 +645,7 @@
                     <button type="button" onclick="window.closeSheetsModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs sm:text-sm transition">
                         Cancel
                     </button>
-                    <button type="button" onclick="window.saveGoogleSheetSettings()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 transition">
+                    <button type="button" onclick="window.saveGoogleSheetSettings()" class="px-5 py-2.5 rounded-xl btn-emerald-vivid font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 transition">
                         <i class="fa-solid fa-check"></i>
                         <span>Save Settings</span>
                     </button>
@@ -612,29 +666,20 @@
         const SHEET_URL_STORAGE_KEY = 'fitforge_google_sheet_url';
         const SHEET_AUTOSYNC_STORAGE_KEY = 'fitforge_google_sheet_autosync';
 
-        // အကယ်၍ Web App URL ကို Code ထဲတွင် အသေထည့်ထားချင်ပါက အောက်ပါ "" ထဲတွင် ထည့်နိုင်ပါသည်
+        // သင်၏ Google Sheet Web App URL ကို ဤနေရာတွင် တစ်ခါတည်း ထည့်ထားနိုင်ပါသည်
         const DEFAULT_GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw_8H0VC3H7JeALVgrJzWjhML-zSmz-6Uyd6EcukK7HxDS_b8FuYjEg-260dDyuFfhIDg/exec";
 
         const DAYS_LIST = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
-        const ORDINAL_MEAL_NAMES = [
-            'First Meal',
-            'Second Meal',
-            'Third Meal',
-            'Fourth Meal',
-            'Fifth Meal',
-            'Sixth Meal'
-        ];
 
-        let currentPage = 'workout'; // 'workout' | 'diet' | 'history'
+        let currentPage = 'workout';
         let currentWorkoutDay = 'Day 1';
         let currentDietDay = 'Day 1';
-        let pendingRestartTarget = null; // 'ALL' or 'Day 1'..'Day 7'
+        let pendingRestartTarget = null;
         let appData = {
-            workouts: [], // { id, day, category, name, steps, reps, weight, finished, finishedAt }
-            meals: []     // { id, day, title, content, savedAt }
+            workouts: [],
+            meals: []
         };
 
-        // --- 24-HOUR TIME FORMATTER (e.g., "09:46") ---
         function get24HourTime() {
             const now = new Date();
             const hh = String(now.getHours()).padStart(2, '0');
@@ -642,7 +687,6 @@
             return `${hh}:${mm}`;
         }
 
-        // --- INITIAL SAMPLE DATA ---
         function getDefaultSampleData() {
             return {
                 workouts: [
@@ -743,7 +787,6 @@
             };
         }
 
-        // --- STORAGE FUNCTIONS ---
         function loadData() {
             try {
                 const raw = localStorage.getItem(STORAGE_KEY);
@@ -770,7 +813,6 @@
             }
         }
 
-        // --- HELPER UTILITIES ---
         function escapeHtml(str) {
             if (str === null || str === undefined) return '';
             return String(str)
@@ -790,9 +832,9 @@
             if (!container) return;
             const toast = document.createElement('div');
             const colors = type === 'success'
-                ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+                ? 'btn-emerald-vivid'
                 : type === 'amber'
-                ? 'bg-amber-400 text-slate-950 border-amber-300'
+                ? 'btn-amber-vivid'
                 : 'bg-slate-800 text-white border-slate-600';
 
             toast.className = `px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm shadow-2xl border flex items-center gap-2 transition-all duration-300 transform translate-y-2 opacity-0 ${colors}`;
@@ -818,9 +860,9 @@
             document.getElementById('page-history').classList.add('hidden');
 
             const navIds = {
-                workout: { btn: 'nav-workout', activeClass: 'bg-emerald-500 text-slate-950 shadow-md' },
-                diet: { btn: 'nav-diet', activeClass: 'bg-amber-400 text-slate-950 shadow-md' },
-                history: { btn: 'nav-history', activeClass: 'bg-cyan-400 text-slate-950 shadow-md' }
+                workout: { btn: 'nav-workout', activeClass: 'btn-emerald-vivid shadow-md' },
+                diet: { btn: 'nav-diet', activeClass: 'btn-amber-vivid shadow-md' },
+                history: { btn: 'nav-history', activeClass: 'btn-cyan-vivid shadow-md' }
             };
 
             Object.keys(navIds).forEach(key => {
@@ -870,8 +912,8 @@
                     }">
                         <span>${day}</span>
                         ${count > 0 ? `
-                            <span class="px-1.5 py-0.5 text-[10px] rounded-full ${
-                                allDone ? 'bg-emerald-500 text-slate-950 font-extrabold' : 'bg-slate-800 text-slate-300'
+                            <span class="px-1.5 py-0.5 text-[10px] rounded-full font-extrabold ${
+                                allDone ? 'btn-emerald-vivid' : 'pill-badge-dark'
                             }">
                                 ${allDone ? '<i class="fa-solid fa-check"></i>' : count}
                             </span>
@@ -961,10 +1003,10 @@
                         <div class="space-y-1 max-w-md mx-auto">
                             <h3 class="text-lg font-bold text-white">No Workouts Added for ${currentWorkoutDay} Yet</h3>
                             <p class="text-xs sm:text-sm text-slate-400">
-                                Click the <span class="text-emerald-400 font-bold">+ Add Workout</span> button to add your Workout Title (e.g., Chest), Exercise Name, Steps, Reps, and Weight (kg).
+                                Tap the <span class="text-emerald-400 font-bold">+</span> button to add your Workout Title (e.g., Chest), Exercise Name, Steps, Reps, and Weight (kg).
                             </p>
                         </div>
-                        <button type="button" onclick="window.openWorkoutModal()" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/20 transition">
+                        <button type="button" onclick="window.openWorkoutModal()" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl btn-emerald-vivid font-extrabold text-sm shadow-lg shadow-emerald-500/20 transition">
                             <i class="fa-solid fa-plus"></i> Add Workout for ${currentWorkoutDay}
                         </button>
                     </div>
@@ -983,12 +1025,12 @@
                             ? 'border-emerald-500/60 shadow-lg shadow-emerald-500/10'
                             : 'border-slate-800'
                     }">
-                        <!-- Category Title Header (e.g., CHEST) -->
+                        <!-- Category Title Header -->
                         <div class="px-4 sm:px-6 py-4 bg-slate-900/90 border-b border-slate-800/90 flex flex-wrap items-center justify-between gap-3">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-base sm:text-lg font-extrabold ${
                                     isGroupFinished
-                                        ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/25'
+                                        ? 'btn-emerald-vivid shadow-md shadow-emerald-500/25'
                                         : 'bg-slate-800 text-emerald-400 border border-slate-700'
                                 }">
                                     <i class="fa-solid ${isGroupFinished ? 'fa-check-double' : 'fa-fire'}"></i>
@@ -1011,7 +1053,7 @@
                             <!-- Quick + Add Exercise Button Inside Category Card -->
                             <button type="button" onclick="window.openWorkoutModalForCategory(decodeURIComponent('${encodedCategory}'))" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-emerald-500/20 hover:text-emerald-300 text-slate-200 border border-slate-700 hover:border-emerald-500/40 text-xs font-bold transition">
                                 <i class="fa-solid fa-plus text-emerald-400"></i>
-                                <span>+ Add Exercise</span>
+                                <span>Add Exercise</span>
                             </button>
                         </div>
 
@@ -1024,7 +1066,7 @@
                                     <div class="flex items-start sm:items-center gap-3.5">
                                         <div class="mt-0.5 sm:mt-0 w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center border transition ${
                                             ex.finished
-                                                ? 'bg-emerald-500 border-emerald-400 text-slate-950 font-bold shadow-sm shadow-emerald-500/30'
+                                                ? 'btn-emerald-vivid font-bold shadow-sm shadow-emerald-500/30'
                                                 : 'bg-slate-900 border-slate-700 text-slate-400'
                                         }">
                                             ${ex.finished ? '<i class="fa-solid fa-check text-sm"></i>' : `<span class="text-xs font-bold">${idx + 1}</span>`}
@@ -1059,7 +1101,7 @@
                                         <button type="button" onclick="window.toggleSingleExerciseFinish('${ex.id}')" class="flex-1 sm:flex-initial px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition ${
                                             ex.finished
                                                 ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/50'
-                                                : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-md shadow-emerald-500/20 active:scale-95'
+                                                : 'btn-emerald-vivid shadow-md shadow-emerald-500/20 active:scale-95'
                                         }">
                                             <i class="fa-solid ${ex.finished ? 'fa-rotate-left' : 'fa-check'}"></i>
                                             <span>${ex.finished ? 'Finished (Undo)' : 'Finish'}</span>
@@ -1091,7 +1133,7 @@
                             <button type="button" onclick="window.toggleCategoryFinish(decodeURIComponent('${encodedCategory}'))" class="w-full sm:w-auto px-5 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition ${
                                 isGroupFinished
                                     ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/50'
-                                    : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/20 active:scale-95'
+                                    : 'btn-emerald-vivid shadow-lg shadow-emerald-500/20 active:scale-95'
                             }">
                                 <i class="fa-solid ${isGroupFinished ? 'fa-rotate-left' : 'fa-check-double'}"></i>
                                 <span>${isGroupFinished ? 'Finished (Undo)' : 'Finish'}</span>
@@ -1309,7 +1351,7 @@
                             : 'bg-slate-900/70 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
                     }">
                         <span>${day}</span>
-                        ${count > 0 ? `<span class="px-1.5 py-0.5 text-[10px] rounded-full bg-amber-400 text-slate-950 font-extrabold">${count}</span>` : ''}
+                        ${count > 0 ? `<span class="px-1.5 py-0.5 text-[10px] rounded-full pill-badge-amber font-extrabold">${count}</span>` : ''}
                     </button>
                 `;
             }).join('');
@@ -1336,11 +1378,11 @@
                         <div class="space-y-1 max-w-md mx-auto">
                             <h3 class="text-lg font-bold text-white">No Meal Text Boxes for ${currentDietDay} Yet</h3>
                             <p class="text-xs sm:text-sm text-slate-400">
-                                Click <strong>+ New Text Box</strong> to summon as many meal boxes as you want (e.g., First Meal, Second Meal, Third Meal) and write down what you eat.
+                                Click <strong>New Text Box</strong> to summon as many meal boxes as you want and write down what you eat.
                             </p>
                         </div>
-                        <button type="button" onclick="window.addMealTextBox()" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-sm shadow-lg shadow-amber-500/20 transition">
-                            <i class="fa-solid fa-plus"></i> + New Text Box
+                        <button type="button" onclick="window.addMealTextBox()" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl btn-amber-vivid font-extrabold text-sm shadow-lg shadow-amber-500/20 transition">
+                            <i class="fa-solid fa-plus"></i> New Text Box
                         </button>
                     </div>
                 `;
@@ -1410,7 +1452,7 @@
             }).join('') + `
                 <!-- Extra Card at the end to summon another Text Box with 1 click -->
                 <button type="button" onclick="window.addMealTextBox()" class="min-h-[180px] sm:min-h-[220px] rounded-2xl sm:rounded-3xl border-2 border-dashed border-slate-800 hover:border-amber-400/60 bg-slate-900/30 hover:bg-slate-900/60 p-6 flex flex-col items-center justify-center gap-3 text-slate-400 hover:text-amber-300 transition group active:scale-95">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-800 group-hover:bg-amber-400 group-hover:text-slate-950 flex items-center justify-center text-xl transition">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 group-hover:bg-amber-500/20 group-hover:text-amber-300 flex items-center justify-center text-xl transition">
                         <i class="fa-solid fa-plus"></i>
                     </div>
                     <div class="text-center">
@@ -1500,7 +1542,6 @@
             const dayFilter = document.getElementById('history-day-filter').value;
             updateSheetStatusIndicator();
 
-            // Calculate Weekly Stats across all 7 days (ONLY 2 STAT CARDS)
             const totalWorkouts = appData.workouts.length;
             const totalFinishedWorkouts = appData.workouts.filter(w => w.finished).length;
             const totalMealsLogged = appData.meals.filter(m => m.content.trim() !== '' || m.title.trim() !== '').length;
@@ -1534,10 +1575,8 @@
             const container = document.getElementById('history-days-container');
 
             container.innerHTML = daysToRender.map(day => {
-                // ONLY FINISHED workouts for this day!
                 const finishedDayWorkouts = appData.workouts.filter(w => w.day === day && w.finished === true);
 
-                // Group finished workouts by Category Title
                 const groupMap = new Map();
                 finishedDayWorkouts.forEach(w => {
                     const k = normalizeCategoryKey(w.category);
@@ -1548,7 +1587,6 @@
                 });
                 const workoutGroups = Array.from(groupMap.values());
 
-                // Logged meals for this day (non-empty title or content)
                 const dayMeals = appData.meals.filter(
                     m => m.day === day && (String(m.title || '').trim() !== '' || String(m.content || '').trim() !== '')
                 );
@@ -1561,7 +1599,7 @@
                         <!-- Day Banner Header with Sync to Sheet & Day Restart Button -->
                         <div class="p-4 sm:px-6 sm:py-4 bg-slate-900/95 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                             <div class="flex items-center gap-3">
-                                <span class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-extrabold text-xs sm:text-sm flex-shrink-0">
+                                <span class="px-3.5 py-1.5 rounded-xl btn-cyan-vivid font-extrabold text-xs sm:text-sm flex-shrink-0">
                                     ${day}
                                 </span>
                                 <div class="min-w-0">
@@ -1572,7 +1610,7 @@
                                 </div>
                             </div>
 
-                            <!-- Action Buttons: Go to Workouts, Go to Diet, Sync to Sheet, and Day Restart -->
+                            <!-- Action Buttons -->
                             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                                 <button type="button" onclick="window.jumpToDayPage('workout', '${day}')" class="flex-1 sm:flex-initial min-h-[38px] text-xs px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-300 border border-slate-700 transition text-center">
                                     <i class="fa-solid fa-dumbbell mr-1"></i> Workouts
@@ -1580,18 +1618,18 @@
                                 <button type="button" onclick="window.jumpToDayPage('diet', '${day}')" class="flex-1 sm:flex-initial min-h-[38px] text-xs px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 text-slate-300 hover:text-amber-300 border border-slate-700 transition text-center">
                                     <i class="fa-solid fa-utensils mr-1"></i> Diet
                                 </button>
-                                <button type="button" onclick="window.syncDayToSheet('${day}')" class="flex-1 sm:flex-initial min-h-[38px] text-xs px-3.5 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500 hover:text-slate-950 text-emerald-300 border border-emerald-500/40 font-extrabold transition flex items-center justify-center gap-1.5 active:scale-95">
+                                <button type="button" onclick="window.syncDayToSheet('${day}')" class="flex-1 sm:flex-initial min-h-[38px] text-xs px-3.5 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-extrabold transition flex items-center justify-center gap-1.5 active:scale-95">
                                     <i class="fa-solid fa-file-excel"></i>
                                     <span>Sync to Sheet</span>
                                 </button>
-                                <button type="button" onclick="window.openRestartModal('${day}')" class="flex-1 sm:flex-initial min-h-[38px] text-xs px-3.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500 hover:text-slate-950 text-amber-300 border border-amber-500/40 font-extrabold transition flex items-center justify-center gap-1.5 active:scale-95">
+                                <button type="button" onclick="window.openRestartModal('${day}')" class="flex-1 sm:flex-initial min-h-[38px] text-xs px-3.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-extrabold transition flex items-center justify-center gap-1.5 active:scale-95">
                                     <i class="fa-solid fa-rotate-left"></i>
                                     <span>Restart</span>
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Two-Column Body: Left = Finished Workouts Log, Right = Diet Meals Log -->
+                        <!-- Two-Column Body -->
                         <div class="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
                             
                             <!-- Column 1: Finished Workouts Record ONLY -->
@@ -1614,7 +1652,7 @@
                                                 <i class="fa-solid fa-layer-group text-emerald-400 text-xs"></i>
                                                 ${escapeHtml(wg.title)}
                                             </span>
-                                            <span class="px-2.5 py-0.5 rounded-full font-bold text-[11px] bg-emerald-500 text-slate-950">
+                                            <span class="px-2.5 py-0.5 rounded-full font-bold text-[11px] pill-badge-dark">
                                                 ${wg.list.length} Finished
                                             </span>
                                         </div>
@@ -1826,18 +1864,28 @@
                 }))
             };
 
+            const jsonBody = JSON.stringify(payload);
+
             try {
                 showToast('Syncing to Google Sheets...', 'amber');
                 await fetch(scriptUrl, {
                     method: 'POST',
                     mode: 'no-cors',
+                    redirect: 'follow',
+                    keepalive: true,
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
+                    body: jsonBody
                 });
                 showToast(successMsg, 'success');
             } catch (err) {
-                console.error('Google Sheets Sync Error:', err);
-                showToast('Failed to sync with Google Sheets', 'amber');
+                if (navigator.sendBeacon) {
+                    const blob = new Blob([jsonBody], { type: 'text/plain;charset=utf-8' });
+                    navigator.sendBeacon(scriptUrl, blob);
+                    showToast(successMsg, 'success');
+                } else {
+                    console.error('Google Sheets Sync Error:', err);
+                    showToast('Failed to sync with Google Sheets', 'amber');
+                }
             }
         }
 
@@ -1983,7 +2031,6 @@ function doPost(e) {
         window.testGoogleSheetConnection = testGoogleSheetConnection;
         window.copyAppsScriptCode = copyAppsScriptCode;
 
-        // Close modals on Escape key
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeWorkoutModal();
@@ -1992,7 +2039,6 @@ function doPost(e) {
             }
         });
 
-        // --- INITIALIZE APP ON LOAD ---
         window.onload = function () {
             loadData();
             updateHistoryBadge();
